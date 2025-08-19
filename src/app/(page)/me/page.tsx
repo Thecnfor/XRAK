@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description: '个人介绍页面 - 专注于创造简洁优雅的解决方案',
   keywords: ['开发者', 'Next.js', 'React', 'TypeScript', '全栈开发', 'UI/UX'],
 };
- 
+  
 export default async function MePage() {
   // 异步获取项目卡片数据，带错误处理
   let projectCardData: ContentCardData[];

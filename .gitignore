@@ -42,4 +42,5 @@ next-env.d.ts
 
 
 # docs
-/docs
+/example
+/.trae

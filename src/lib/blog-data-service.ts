@@ -38,10 +38,20 @@ function getDataSourceUrl(): string {
   const config = getDataSourceConfig()
   
   if (config.isDevelopment) {
-    // 开发环境使用本地API路由
+    // 开发环境优先使用外部API服务器（如果配置了BLOG_API_URL）
+    const externalApiUrl = process.env.BLOG_API_URL
+    if (externalApiUrl) {
+      return externalApiUrl
+    }
+    // 降级到本地API路由
     return `${config.apiBaseUrl}${config.endpoints.BLOG_DATA}`
   } else {
     // 生产环境使用外部API
+    const externalApiUrl = process.env.BLOG_API_URL
+    if (externalApiUrl) {
+      return externalApiUrl
+    }
+    // 降级到本地API路由
     return `${config.apiBaseUrl}${config.endpoints.BLOG_DATA}`
   }
 }
@@ -87,25 +97,78 @@ async function fetchBlogDataFromAPI(): Promise<BlogDataPool> {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
     
-    const data = await response.json()
-    return data as BlogDataPool
+    const rawData = await response.json()
+    
+    // 转换原始数据为BlogDataPool格式
+    const blogInfoPool: Record<string, BlogCategory> = {}
+    
+    if (rawData && typeof rawData === 'object' && rawData.categories) {
+      Object.entries(rawData.categories).forEach(([categoryKey, categoryData]: [string, unknown]) => {
+        const category = categoryData as {
+          title: string
+          href: string
+          defaultArticle?: string
+          articles?: Record<string, unknown>
+        }
+        
+        blogInfoPool[categoryKey] = {
+          categoryInfo: {
+            name: category.title,
+            href: category.href,
+            description: category.title,
+            defaultArticle: category.defaultArticle
+          },
+          articles: category.articles ? Object.fromEntries(
+            Object.entries(category.articles).map(([articleKey, article]: [string, unknown]) => {
+              const articleData = article as {
+                title: string
+                publishDate: string
+                content: string
+                imagePath?: string
+                category?: string
+                source?: string
+              }
+              return [
+                articleKey,
+                {
+                  imagePath: articleData.imagePath,
+                  title: articleData.title,
+                  category: articleData.category || category.title,
+                  publishDate: articleData.publishDate,
+                  content: articleData.content,
+                  source: articleData.source || 'api'
+                } as BlogArticle
+              ]
+            })
+          ) : {}
+        }
+      })
+    }
+    
+    return { blogInfoPool }
   } catch (error) {
     console.error('Failed to fetch blog data from API:', error)
     throw error
   }
-}
+} 
 
 /**
  * 从本地文件获取博客数据（开发环境备用）
  */
 async function fetchBlogDataFromLocal(): Promise<BlogDataPool> {
-  try {
-    // 动态导入以避免构建时的静态分析
-    const blogData = await import('../../docs/blog-data.json')
-    return blogData.default as unknown as BlogDataPool
-  } catch (error) {
-    console.error('Failed to load local blog data:', error)
-    throw error
+  // 返回默认的数据结构作为降级方案，与 route.ts 中的 getFallbackData 保持一致
+  // 在生产环境中，应该从实际的数据源获取数据
+  return {
+    blogInfoPool: {
+      "XRAK": {
+        categoryInfo: {
+          name: "个人简介",
+          href: "/me",
+          description: "个人简介和信息",
+          defaultArticle: "/me"
+        }
+      }
+    }
   }
 }
 
@@ -114,8 +177,8 @@ async function fetchBlogDataFromLocal(): Promise<BlogDataPool> {
  */
 export async function getBlogData(): Promise<BlogDataPool> {
   // 检查缓存是否有效
-  if (isCacheValid()) {
-    return cachedData!
+  if (isCacheValid() && cachedData) {
+    return cachedData
   }
   
   try {
@@ -132,7 +195,7 @@ export async function getBlogData(): Promise<BlogDataPool> {
     console.warn('API fetch failed, attempting fallback strategies:', error)
     
     // 如果有过期缓存，先返回过期数据
-    if (canUseStaleCache()) {
+    if (canUseStaleCache() && cachedData) {
       console.log('Using stale cache while attempting background refresh')
       
       // 后台异步刷新（不等待结果）
@@ -146,7 +209,7 @@ export async function getBlogData(): Promise<BlogDataPool> {
         }
       }, 0)
       
-      return cachedData!
+      return cachedData
     }
     
     // 最后的降级：使用本地数据

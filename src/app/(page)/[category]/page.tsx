@@ -2,29 +2,12 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getCategoryFromUrl, getAvailableCategories } from '@/lib/category-mapping-service'
+import { getBlogData as getBlogDataFromService, BlogDataPool } from '@/lib/blog-data-service'
 
 // 动态映射已移至 category-mapping-service
 
-interface BlogData {
-  blogInfoPool: {
-    [key: string]: {
-      categoryInfo: {
-        name: string
-        href: string
-        description: string
-        defaultArticle?: string
-      }
-      articles?: {
-        [key: string]: {
-          title: string
-          category: string
-          publishDate: string
-          content: string
-        }
-      }
-    }
-  }
-}
+// 使用统一的博客数据类型
+type BlogData = BlogDataPool 
 
 interface CategoryPageProps {
   params: Promise<{
@@ -32,25 +15,8 @@ interface CategoryPageProps {
   }>
 }
 
-// 获取博客数据
-async function getBlogData(): Promise<BlogData> {
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/blog-data`, {
-      next: { revalidate: 60 } // ISR: 60秒重新验证
-    })
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch blog data')
-    }
-    
-    return response.json()
-  } catch (error) {
-    console.error('Error fetching blog data:', error)
-    // 降级到本地数据
-    const blogData = await import('../../../../docs/blog-data.json')
-    return blogData.default as BlogData
-  }
-}
+// 使用统一的博客数据服务
+const getBlogData = getBlogDataFromService
 
 // 生成元数据
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {

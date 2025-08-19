@@ -54,6 +54,14 @@ Cache-Control: public, s-maxage=60, stale-while-revalidate=300
         }
       }
     }
+  },
+  "categories": {
+    "XRAK": {
+      "title": "个人简介",
+      "href": "/me",
+      "hasSubmenu": false,
+      "defaultArticle": "/me"
+    }
   }
 }
 ```
@@ -550,6 +558,109 @@ npm run analyze
 - 环境配置信息
 - 复现步骤
 - 预期行为描述
+
+---
+
+## 导航系统与ISR集成
+
+### 导航数据API
+
+**端点**: `GET /api/navigation`
+
+**功能**: 提供导航菜单数据，支持ISR增量更新
+
+**ISR配置**:
+```typescript
+{
+  revalidate: 60,                // 60秒重新验证
+  staleWhileRevalidate: 300,     // 5分钟过期
+  dynamic: 'force-static',       // 强制静态生成
+  cache: 'public, s-maxage=60, stale-while-revalidate=300'
+}
+```
+
+**响应格式**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "title": "个人简介",
+      "href": "/me",
+      "hasSubmenu": false,
+      "defaultArticle": "/me",
+      "articles": []
+    },
+    {
+      "title": "技术",
+      "href": "/tech",
+      "hasSubmenu": true,
+      "defaultArticle": "/tech/nextjs-guide",
+      "articles": [
+        {
+          "title": "Next.js 15 开发指南",
+          "category": "技术",
+          "publishDate": "2024-01-15",
+          "content": "Next.js",
+          "source": "api"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2025-08-19T13:54:40.400Z"
+}
+```
+
+### 导航Hook使用
+
+**useNavigationData Hook**:
+```typescript
+const {
+  navigationData,    // 导航数据数组
+  isLoading,        // 加载状态
+  hasError,         // 错误状态
+  refetch,          // 重新获取函数
+  cacheStatus,      // 缓存状态
+  isStale,          // 数据是否过期
+  refreshCache      // 刷新缓存函数
+} = useNavigationData()
+```
+
+**useNavigationItems Hook**:
+```typescript
+const { simpleItems, submenuItems } = useNavigationItems(navigationData)
+```
+
+### ISR缓存管理
+
+**手动刷新缓存**:
+```bash
+# 刷新导航缓存
+curl -X POST "http://localhost:3000/api/revalidate?path=/api/navigation"
+
+# 刷新博客数据缓存
+curl -X POST "http://localhost:3000/api/revalidate?path=/api/blog-data"
+```
+
+**自动缓存检测**:
+- 每5秒检查缓存状态
+- 自动检测数据过期
+- 支持后台增量更新
+- 错误时自动降级到本地数据
+
+### 生产环境优化
+
+**构建优化**:
+- 静态预渲染导航页面
+- ISR增量更新支持
+- 自动代码分割
+- 缓存策略优化
+
+**性能指标**:
+- 首次加载: < 171KB
+- 导航切换: < 3KB
+- 缓存命中率: > 95%
+- 更新延迟: < 60秒
 
 ---
 

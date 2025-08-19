@@ -1,17 +1,25 @@
 import { NextResponse } from 'next/server'
-import blogData from '../../../../docs/blog-data.json'
+import { ISR_CONFIG } from '@/config/isr-config'
+import { getBlogData } from '@/lib/blog-data-service'
 
 /**
  * GET /api/blog-data
- * 返回博客数据（开发环境使用本地JSON文件）
+ * 返回博客数据（使用模拟数据或外部API）
  */
 export async function GET() {
   try {
-    // 在开发环境中，直接返回本地JSON数据
+    // 从example目录或降级数据获取博客数据
+    const blogData = await getBlogData()
+    
+    // 模拟网络延迟
+    if (process.env.NODE_ENV === 'development') {
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+    
     // 添加适当的缓存头
     return NextResponse.json(blogData, {
       headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        'Cache-Control': `public, s-maxage=${ISR_CONFIG.BLOG_DATA.revalidate}, stale-while-revalidate=${ISR_CONFIG.BLOG_DATA.staleWhileRevalidate}`,
         'Content-Type': 'application/json'
       }
     })
