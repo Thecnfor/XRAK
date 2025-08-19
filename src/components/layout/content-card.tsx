@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { getCacheConfig } from '@/config/isr-config';
 
 interface ContentCardData {
   title: string;
@@ -10,6 +11,8 @@ interface ContentCardData {
   content?: string;
   href?: string;
   imagePath?: string;
+  id?: string;
+  lastUpdated?: string;
 }
 
 interface ContentCardProps {
@@ -19,6 +22,14 @@ interface ContentCardProps {
   href?: string;
   isLoading?: boolean;
   onError?: (error: Error) => void;
+  enableISR?: boolean;
+  cacheKey?: string;
+}
+
+interface CacheStatus {
+  isStale: boolean;
+  lastFetch: Date | null;
+  retryCount: number;
 }
 
 // 加载状态组件
@@ -128,12 +139,72 @@ export const ContentCard: React.FC<ContentCardProps> = ({
   className = '',
   href,
   isLoading = false,
-  onError
+  onError,
+  enableISR = true,
+  cacheKey
 }) => {
   const router = useRouter();
+  const [cacheStatus, setCacheStatus] = useState<CacheStatus>({
+    isStale: false,
+    lastFetch: null,
+    retryCount: 0
+  });
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // ISR缓存检查
+  useEffect(() => {
+    if (!enableISR || !data?.lastUpdated) return;
+
+    const config = getCacheConfig();
+    const lastUpdated = new Date(data.lastUpdated);
+    const now = new Date();
+    const timeDiff = now.getTime() - lastUpdated.getTime();
+    const isStale = timeDiff > config.defaultRevalidateTime * 1000;
+
+    setCacheStatus(prev => ({
+      ...prev,
+      isStale,
+      lastFetch: lastUpdated
+    }));
+  }, [data?.lastUpdated, enableISR]);
+
+  // 缓存刷新处理
+  const handleCacheRefresh = useCallback(async () => {
+    if (!enableISR || !cacheKey || isRefreshing) return;
+
+    setIsRefreshing(true);
+    try {
+      const response = await fetch(`/api/revalidate?path=${encodeURIComponent(cacheKey)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to refresh cache');
+      }
+
+      setCacheStatus(prev => ({
+        ...prev,
+        isStale: false,
+        lastFetch: new Date(),
+        retryCount: 0
+      }));
+    } catch (error) {
+      console.error('Cache refresh failed:', error);
+      setCacheStatus(prev => ({
+        ...prev,
+        retryCount: prev.retryCount + 1
+      }));
+      onError?.(error as Error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [enableISR, cacheKey, isRefreshing, onError]);
   
   // 处理加载状态
-  if (isLoading) {
+  if (isLoading || isRefreshing) {
     return <LoadingCard variant={variant} className={className} />;
   }
   
@@ -180,13 +251,20 @@ export const ContentCard: React.FC<ContentCardProps> = ({
           <div className="text-xl font-bold py-3">
             {title}
           </div>
-          <div className="text-sm">
-            <span className="text-[var(--color-text)] text-bold">
-              {category}
-            </span>
-            <span className="text-[var(--color-btn)] px-3">
-              {publishDate}
-            </span>
+          <div className="text-sm flex justify-between items-center">
+            <div>
+              <span className="text-[var(--color-text)] text-bold">
+                {category}
+              </span>
+              <span className="text-[var(--color-btn)] px-3">
+                {publishDate}
+              </span>
+            </div>
+            {enableISR && cacheStatus.lastFetch && (
+              <span className="text-xs text-gray-500" title={`最后更新: ${cacheStatus.lastFetch.toLocaleString()}`}>
+                缓存: {cacheStatus.isStale ? '已过期' : '有效'}
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -196,7 +274,27 @@ export const ContentCard: React.FC<ContentCardProps> = ({
   if (variant === 'news') {
     
     return (
-      <div className={`cursor-pointer w-full h-full ${className}`} onClick={handleClick}>
+      <div className={`cursor-pointer w-full h-full relative ${className}`} onClick={handleClick}>
+        {/* ISR缓存状态指示器 */}
+        {enableISR && cacheStatus.isStale && (
+          <div className="absolute top-2 right-2 z-10">
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" title="缓存已过期" />
+              {cacheStatus.retryCount < 3 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCacheRefresh();
+                  }}
+                  className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition-colors"
+                  title="刷新缓存"
+                >
+                  刷新
+                </button>
+              )}
+            </div>
+          </div>
+        )}
         <div className="w-full h-full flex items-center justify-start">
           <div className="aspect-[1/1] h-full rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-900">
             <span 
@@ -218,13 +316,20 @@ export const ContentCard: React.FC<ContentCardProps> = ({
               <div className="text-lg font-bold py-4">
                 {title}
               </div>
-              <div className="text-sm">
-                <span className="text-[var(--color-text)] text-bold">
-                  {category}
-                </span>
-                <span className="text-[var(--color-btn)] px-3">
-                  {publishDate}
-                </span>
+              <div className="text-sm flex justify-between items-center">
+                <div>
+                  <span className="text-[var(--color-text)] text-bold">
+                    {category}
+                  </span>
+                  <span className="text-[var(--color-btn)] px-3">
+                    {publishDate}
+                  </span>
+                </div>
+                {enableISR && cacheStatus.lastFetch && (
+                  <span className="text-xs text-gray-500" title={`最后更新: ${cacheStatus.lastFetch.toLocaleString()}`}>
+                    缓存: {cacheStatus.isStale ? '已过期' : '有效'}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -235,7 +340,27 @@ export const ContentCard: React.FC<ContentCardProps> = ({
 
   if (variant === 'project') {
     return (
-      <div className={`group cursor-pointer ${className}`} onClick={handleClick}>
+      <div className={`group cursor-pointer relative ${className}`} onClick={handleClick}>
+        {/* ISR缓存状态指示器 */}
+        {enableISR && cacheStatus.isStale && (
+          <div className="absolute top-2 right-2 z-10">
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" title="缓存已过期" />
+              {cacheStatus.retryCount < 3 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCacheRefresh();
+                  }}
+                  className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition-colors"
+                  title="刷新缓存"
+                >
+                  刷新
+                </button>
+              )}
+            </div>
+          </div>
+        )}
         <div className="border border-gray-200 dark:border-zinc-800 rounded-lg p-6 transition-colors duration-200 dark:bg-black">
           <div className="aspect-[1/1] min-h-[4rem] rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-900 mb-4">
             <span 
@@ -253,13 +378,20 @@ export const ContentCard: React.FC<ContentCardProps> = ({
             </span>
           </div>
           <h3 className="font-medium text-gray-800 dark:text-zinc-100 mb-2">{title}</h3>
-          <div className="text-sm">
-            <span className="text-[var(--color-text)] text-bold">
-              {category}
-            </span>
-            <span className="text-[var(--color-btn)] px-3">
-              {publishDate}
-            </span>
+          <div className="text-sm flex justify-between items-center">
+            <div>
+              <span className="text-[var(--color-text)] text-bold">
+                {category}
+              </span>
+              <span className="text-[var(--color-btn)] px-3">
+                {publishDate}
+              </span>
+            </div>
+            {enableISR && cacheStatus.lastFetch && (
+              <span className="text-xs text-gray-500" title={`最后更新: ${cacheStatus.lastFetch.toLocaleString()}`}>
+                缓存: {cacheStatus.isStale ? '已过期' : '有效'}
+              </span>
+            )}
           </div>
         </div>
       </div>

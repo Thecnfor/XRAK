@@ -75,7 +75,7 @@ export async function HEAD(
         'Content-Type': 'application/json'
       }
     })
-  } catch (error) {
+  } catch {
     return new NextResponse(null, { status: 500 })
   }
 }

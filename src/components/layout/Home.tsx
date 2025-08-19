@@ -307,7 +307,7 @@ const NavItemSimple = ({ title, href, onMobileNavClose }: { title: string; href:
 }
 
 const Nav = () => {
-  const { isDesktopNavVisible, isMobileNavVisible } = useAppSelector((state) => state.nav)
+  const { isDesktopNavVisible } = useAppSelector((state) => state.nav)
   const dispatch = useAppDispatch()
   const [isSecondaryVisible, setIsSecondaryVisible] = useState(false)
   const [currentPanel, setCurrentPanel] = useState<'left' | 'right'>('left')
@@ -326,7 +326,13 @@ const Nav = () => {
   }, [])
   
   // 使用自定义Hook管理导航数据
-  const { navigationData, isLoading, hasError, refetch, cacheStatus } = useNavigationData()
+  const {
+    navigationData,
+    isLoading,
+    hasError,
+    refetch,
+    cacheStatus
+  } = useNavigationData()
   const { simpleItems, submenuItems } = useNavigationItems(navigationData)
   
   const handleSubmenuToggle = (item: NavigationItem, panelType: 'mobile' | 'desktop') => {
@@ -374,7 +380,7 @@ const Nav = () => {
                         />
                       </div>
                     ) : (
-                      <ul className="text-nav-mobile space-y-2 font-medium md:text-nav-desktop">
+                        <ul className="text-nav-mobile space-y-2 font-medium md:text-nav-desktop">
                           {/* 渲染单级导航项 */}
                           {simpleItems.map((item, index) => (
                             <li 
@@ -408,7 +414,7 @@ const Nav = () => {
                               />
                             </li>
                           ))}
-                      </ul>
+                        </ul>
                     )}
                 </div>
                 <div className={`w-[calc(var(--spacing-nav-width)-2*var(--spacing-xs))] flex-shrink-0 transition-all duration-sidebar ease-curve-sidebar ${

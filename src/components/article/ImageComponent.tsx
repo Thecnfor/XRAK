@@ -19,9 +19,7 @@ export function ImageComponent({
   caption, 
   id, 
   priority = false,
-  quality,
-  width = 1200,
-  height = 800
+  quality
 }: ImageComponentProps) {
   const imageConfig = getImageCacheConfig()
   const imageQuality = quality || imageConfig.quality.default

@@ -69,8 +69,6 @@ const DEFAULT_MAPPING_CONFIG: MappingConfig = {
  * 获取映射配置
  */
 export function getMappingConfig(): MappingConfig {
-  const isDevelopment = process.env.NODE_ENV === 'development'
-  
   // 从环境变量覆盖配置
   const config: MappingConfig = {
     ...DEFAULT_MAPPING_CONFIG,

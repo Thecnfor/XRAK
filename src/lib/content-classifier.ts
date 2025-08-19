@@ -27,7 +27,7 @@ async function extractAllArticles(): Promise<ContentCardData[]> {
   const blogPool = blogData.blogInfoPool
   const articles: ContentCardData[] = []
   
-  Object.entries(blogPool).forEach(([_categoryKey, categoryData]) => {
+  Object.entries(blogPool).forEach(([, categoryData]) => {
     if (categoryData.articles) {
       const categoryHref = categoryData.categoryInfo.href
       Object.entries(categoryData.articles).forEach(([articleId, article]) => {

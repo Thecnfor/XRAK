@@ -24,7 +24,7 @@ export async function getNavigationData(): Promise<NavigationItem[]> {
   const blogData = await getBlogData()
   const { blogInfoPool } = blogData
   
-  return Object.entries(blogInfoPool).map(([_key, category]) => {
+  return Object.entries(blogInfoPool).map(([, category]) => {
     const { categoryInfo, articles } = category as BlogCategory
     
     return {

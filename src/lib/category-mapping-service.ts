@@ -1,4 +1,4 @@
-import { getBlogData, type BlogCategory } from './blog-data-service'
+import { getBlogData } from './blog-data-service'
 import { getMappingConfig, DEFAULT_CATEGORY_MAPPINGS } from '@/config/mapping-config'
 
 /**

@@ -1,6 +1,35 @@
 /**
  * ISR (Incremental Static Regeneration) 配置
+ * 统一管理增量静态再生相关的配置项
  */
+
+// 环境变量类型定义
+interface ISREnvironmentConfig {
+  revalidateTime: number;
+  staleTime: number;
+  enableOnDemand: boolean;
+  maxRetries: number;
+  retryDelay: number;
+}
+
+// 缓存状态接口
+export interface CacheStatus {
+  isStale: boolean;
+  lastFetch: Date | null;
+  retryCount: number;
+  nextRevalidation?: Date;
+}
+
+// 获取环境变量配置
+function getEnvironmentConfig(): ISREnvironmentConfig {
+  return {
+    revalidateTime: parseInt(process.env.ISR_REVALIDATE_TIME || '60'),
+    staleTime: parseInt(process.env.ISR_STALE_TIME || '300'),
+    enableOnDemand: process.env.ISR_ENABLE_ON_DEMAND === 'true',
+    maxRetries: parseInt(process.env.ISR_MAX_RETRIES || '3'),
+    retryDelay: parseInt(process.env.ISR_RETRY_DELAY || '1000')
+  };
+}
 
 export const ISR_CONFIG = {
   // 默认重新验证时间（秒）
@@ -9,19 +38,25 @@ export const ISR_CONFIG = {
   // 默认过期缓存可用时间（秒）
   DEFAULT_STALE_TIME: 300,
   
+  // 环境变量配置
+  ENV: getEnvironmentConfig(),
+  
   // 博客数据相关配置
   BLOG_DATA: {
     // 重新验证时间
-    revalidate: parseInt(process.env.ISR_REVALIDATE_TIME || '60'),
+    revalidate: getEnvironmentConfig().revalidateTime,
     
     // 过期后仍可使用的时间
-    staleWhileRevalidate: parseInt(process.env.ISR_STALE_TIME || '300'),
+    staleWhileRevalidate: getEnvironmentConfig().staleTime,
     
     // 最大重试次数
-    maxRetries: 3,
+    maxRetries: getEnvironmentConfig().maxRetries,
     
     // 重试延迟（毫秒）
-    retryDelay: 1000
+    retryDelay: getEnvironmentConfig().retryDelay,
+    
+    // 是否启用按需重新验证
+    enableOnDemand: getEnvironmentConfig().enableOnDemand
   },
   
   // 缓存键前缀
@@ -77,9 +112,7 @@ export function getDataSourceConfig() {
   
   return {
     isDevelopment: isDev,
-    apiBaseUrl: isDev 
-      ? process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-      : process.env.BLOG_API_URL || 'http://localhost:8000',
+    apiBaseUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
     endpoints: isDev ? ISR_CONFIG.API_ENDPOINTS.DEV : ISR_CONFIG.API_ENDPOINTS.PROD
   }
 }
@@ -88,7 +121,11 @@ export function getDataSourceConfig() {
  * 获取缓存配置
  */
 export function getCacheConfig() {
-  return ISR_CONFIG.BLOG_DATA
+  return {
+    ...ISR_CONFIG.BLOG_DATA,
+    defaultRevalidateTime: ISR_CONFIG.ENV.revalidateTime,
+    defaultStaleTime: ISR_CONFIG.ENV.staleTime
+  }
 }
 
 /**
@@ -99,13 +136,62 @@ export function getImageCacheConfig() {
 }
 
 /**
+ * 检查缓存是否过期
+ */
+export function isCacheStale(lastFetch: Date | null, revalidateTime?: number): boolean {
+  if (!lastFetch) return true
+  
+  const now = new Date()
+  const timeDiff = now.getTime() - lastFetch.getTime()
+  const threshold = (revalidateTime || ISR_CONFIG.ENV.revalidateTime) * 1000
+  
+  return timeDiff > threshold
+}
+
+/**
+ * 创建缓存状态对象
+ */
+export function createCacheStatus(lastFetch?: Date | null, retryCount = 0): CacheStatus {
+  const isStale = isCacheStale(lastFetch || null)
+  const nextRevalidation = lastFetch 
+    ? new Date(lastFetch.getTime() + ISR_CONFIG.ENV.revalidateTime * 1000)
+    : undefined
+  
+  return {
+    isStale,
+    lastFetch: lastFetch || null,
+    retryCount,
+    nextRevalidation
+  }
+}
+
+/**
+ * 获取重新验证API路径
+ */
+export function getRevalidatePath(cacheKey: string): string {
+  return `/api/revalidate?path=${encodeURIComponent(cacheKey)}`
+}
+
+/**
+ * 获取完整的ISR配置
+ */
+export function getISRConfig() {
+  return {
+    ...ISR_CONFIG,
+    environment: process.env.NODE_ENV,
+    isDevelopment: process.env.NODE_ENV === 'development',
+    isProduction: process.env.NODE_ENV === 'production'
+  }
+}
+
+/**
  * 获取图片缓存键
  */
 export function getImageCacheKey(src: string, options?: { width?: number; height?: number; quality?: number }) {
   const baseKey = `${ISR_CONFIG.CACHE_KEYS.IMAGES}:${src}`
   if (options) {
     const optionsStr = Object.entries(options)
-      .filter(([_, value]) => value !== undefined)
+      .filter(([, value]) => value !== undefined)
       .map(([key, value]) => `${key}=${value}`)
       .join('&')
     return optionsStr ? `${baseKey}?${optionsStr}` : baseKey

@@ -69,6 +69,15 @@ export default async function BlogPage({ params }: BlogPageProps) {
   // Next.js 15: 在使用前需要先解析params参数
   const resolvedParams = await params
   
+  // 过滤特殊路径（如Vite开发工具请求）
+  // 处理URL编码的情况，如 %40vite -> @vite
+  const decodedCategory = decodeURIComponent(resolvedParams.category)
+  if (resolvedParams.category.startsWith('@') || resolvedParams.category.startsWith('_') ||
+      resolvedParams.category.startsWith('%40') || resolvedParams.category.startsWith('%5F') ||
+      decodedCategory.startsWith('@') || decodedCategory.startsWith('_')) {
+    notFound()
+  }
+  
   // 使用增强的内容获取服务
   const article = await getArticleContent(resolvedParams.category, resolvedParams.articles)
   const categoryContent = await getCategoryContent(resolvedParams.category)

@@ -141,6 +141,15 @@ async function getCategoryKeyFromUrl(urlPath: string): Promise<string> {
  */
 async function loadDetailedContent(categoryKey: string): Promise<DetailedCategory | null> {
   try {
+    // 过滤特殊路径（如Vite开发工具请求）
+    // 处理URL编码的情况，如 %40vite -> @vite
+    const decodedKey = decodeURIComponent(categoryKey)
+    if (categoryKey.startsWith('@') || categoryKey.startsWith('_') || 
+        categoryKey.startsWith('%40') || categoryKey.startsWith('%5F') ||
+        decodedKey.startsWith('@') || decodedKey.startsWith('_')) {
+      return null
+    }
+    
     const contentDir = getContentDirectory()
     const categoryDir = path.join(contentDir, categoryKey)
     
@@ -300,6 +309,15 @@ export async function getCategoryContent(categoryKey: string): Promise<{
   }
   articles: DetailedArticle[]
 }> {
+  // 过滤特殊路径（如Vite开发工具请求）
+  // 处理URL编码的情况，如 %40vite -> @vite
+  const decodedKey = decodeURIComponent(categoryKey)
+  if (categoryKey.startsWith('@') || categoryKey.startsWith('_') || 
+      categoryKey.startsWith('%40') || categoryKey.startsWith('%5F') ||
+      decodedKey.startsWith('@') || decodedKey.startsWith('_')) {
+    throw new Error(`Invalid category path: ${categoryKey}`)
+  }
+  
   const config = getDataSourceConfig()
   const strategy = CONTENT_STRATEGY[config.isDevelopment ? 'development' : 'production']
   

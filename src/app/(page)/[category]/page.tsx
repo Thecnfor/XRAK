@@ -35,7 +35,7 @@ interface CategoryPageProps {
 // 获取博客数据
 async function getBlogData(): Promise<BlogData> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'}/api/blog-data`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/blog-data`, {
       next: { revalidate: 60 } // ISR: 60秒重新验证
     })
     
@@ -95,6 +95,16 @@ export async function generateStaticParams() {
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category } = await params
+  
+  // 过滤特殊路径（如Vite开发工具请求）
+  // 处理URL编码的情况，如 %40vite -> @vite
+  const decodedCategory = decodeURIComponent(category)
+  if (category.startsWith('@') || category.startsWith('_') ||
+      category.startsWith('%40') || category.startsWith('%5F') ||
+      decodedCategory.startsWith('@') || decodedCategory.startsWith('_')) {
+    notFound()
+  }
+  
   const categoryKey = await getCategoryFromUrl(category)
   
   if (!categoryKey) {

@@ -1,10 +1,13 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ContentCard } from '@/components/layout/content-card';
+import { ContentCard, type ContentCardData } from '@/components/layout/content-card';
 import { contactLinksData } from '@/config/content-data';
 import { generateProjectCardData } from '@/lib/content-classifier';
 import { TextAnimate } from '@/components/magicui/text-animate';
+
+// ISR配置 - 启用增量静态再生
+export const revalidate = 3600; // 1小时重新验证
 
 export const metadata: Metadata = {
   title: '关于我',
@@ -13,8 +16,20 @@ export const metadata: Metadata = {
 };
  
 export default async function MePage() {
-  // 异步获取项目卡片数据
-  const projectCardData = await generateProjectCardData();
+  // 异步获取项目卡片数据，带错误处理
+  let projectCardData: ContentCardData[];
+  try {
+    projectCardData = await generateProjectCardData();
+    // 为每个项目数据添加最后更新时间
+    projectCardData = projectCardData.map(project => ({
+      ...project,
+      lastUpdated: new Date().toISOString()
+    }));
+  } catch (error) {
+    console.error('Failed to load project data:', error);
+    // 降级处理：返回空数组
+    projectCardData = [];
+  }
   return (
     <div className="min-h-full bg-white dark:bg-black text-black dark:text-white">
       {/* 主容器 - 响应式布局 */}
@@ -151,13 +166,21 @@ export default async function MePage() {
               精选项目
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {projectCardData.map((project, index) => (
-              <ContentCard
-                key={index}
-                data={project}
-                variant="project"
-              />
-            ))}
+              {projectCardData.length > 0 ? (
+                projectCardData.map((project, index) => (
+                  <ContentCard
+                    key={`project-${project.id || index}`}
+                    data={project}
+                    variant="project"
+                    enableISR={true}
+                    cacheKey={`/api/content-cards/project/${project.id || index}`}
+                  />
+                ))
+              ) : (
+                <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
+                  <p>暂无项目数据</p>
+                </div>
+              )}
             </div>
           </section>
 

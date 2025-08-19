@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
  * POST /api/content-cards/refresh
  * 强制刷新卡片数据缓存
  */
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     const { clearClassifiedCache } = await import('@/lib/content-classifier');
     
