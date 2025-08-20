@@ -1,7 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getBlogData } from '@/lib/blog-data-service'
 import { getArticleContent, getCategoryContent } from '@/lib/content-service'
 import { getCategoryToUrlMapping } from '@/lib/category-mapping-service'
 import ArticleRenderer from '@/components/article/ArticleRenderer'
@@ -15,26 +14,49 @@ interface BlogPageProps {
 
 // 生成静态参数
 export async function generateStaticParams() {
-  const blogData = await getBlogData()
-  const { blogInfoPool } = blogData
-  const params: { category: string; articles: string }[] = []
-  
-  // 获取动态映射
-  const categoryUrlMap = await getCategoryToUrlMapping()
-  
-  Object.entries(blogInfoPool).forEach(([categoryKey, categoryData]) => {
-    if (categoryData.articles) {
-      const urlPath = categoryUrlMap[categoryKey] || categoryKey
-      Object.keys(categoryData.articles).forEach(articleId => {
-        params.push({
-          category: urlPath,
-          articles: articleId
-        })
-      })
+  try {
+    // 通过API获取所有分类数据
+    const response = await fetch('http://localhost:8000/api/categories', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'default'
+    })
+    
+    if (!response.ok) {
+      console.error('Failed to fetch categories for static params')
+      return []
     }
-  })
-  
-  return params
+    
+    const data = await response.json()
+    const params: { category: string; articles: string }[] = []
+    
+    // 获取动态映射
+    const categoryUrlMap = await getCategoryToUrlMapping()
+    
+    // 遍历所有分类和文章
+    const categories = data.categories || {}
+    for (const [categoryKey, categoryData] of Object.entries(categories)) {
+      const category = categoryData as {
+        articles?: Record<string, { id: string; title: string; [key: string]: unknown }>
+      }
+      if (category.articles && typeof category.articles === 'object') {
+        const urlPath = categoryUrlMap[categoryKey] || categoryKey
+        Object.entries(category.articles).forEach(([articleId]) => {
+           params.push({
+             category: urlPath,
+             articles: articleId
+           })
+         })
+      }
+    }
+    
+    return params
+  } catch (error) {
+    console.error('Error generating static params:', error)
+    return []
+  }
 }
 
 // 生成元数据

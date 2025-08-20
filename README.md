@@ -53,9 +53,7 @@ Cache-Control: public, s-maxage=60, stale-while-revalidate=300
           "blocks": []
         }
       }
-    }
-  },
-  "categories": {
+    },
     "XRAK": {
       "title": "个人简介",
       "href": "/me",

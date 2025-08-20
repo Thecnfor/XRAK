@@ -50,13 +50,19 @@ async function extractAllArticles(): Promise<ContentCardData[]> {
  * 解析发布日期为可比较的数值
  */
 function parseDateString(dateStr: string): number {
-  // 提取"发布于X月X号"中的月份和日期
-  const match = dateStr.match(/发布于(\d+)月(\d+)号/)
+  // 检查输入是否为有效字符串
+  if (!dateStr || typeof dateStr !== 'string') {
+    return 0
+  }
+  
+  // 提取"发布于YYYY年MM月DD日"中的年份、月份和日期
+  const match = dateStr.match(/发布于(\d{4})年(\d+)月(\d+)日/)
   if (match) {
-    const month = parseInt(match[1])
-    const day = parseInt(match[2])
-    // 假设都是当年，用月份*100+日期作为排序依据
-    return month * 100 + day
+    const year = parseInt(match[1])
+    const month = parseInt(match[2])
+    const day = parseInt(match[3])
+    // 使用年份*10000+月份*100+日期作为排序依据
+    return year * 10000 + month * 100 + day
   }
   return 0
 }

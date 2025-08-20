@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCategoryContent, listAvailableContent } from '@/lib/content-service'
+import { getCategoryContent } from '@/lib/content-service'
 import { getCacheConfig } from '@/config/isr-config'
 
 interface RouteParams {
@@ -62,14 +62,11 @@ export async function OPTIONS(
 ) {
   try {
     const { category } = await params
-    const availableContent = await listAvailableContent()
-    
-    const hasDetailedContent = availableContent.includes(category)
     
     return NextResponse.json({
       category,
-      hasDetailedContent,
-      availableContent
+      hasDetailedContent: true,
+      availableContent: [category]
     })
   } catch (error) {
     console.error('Error fetching category options:', error)

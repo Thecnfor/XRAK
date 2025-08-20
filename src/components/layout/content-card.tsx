@@ -215,6 +215,26 @@ export const ContentCard: React.FC<ContentCardProps> = ({
   
   // 解构数据属性
   const { title, category, publishDate, content, href: dataHref } = data;
+  
+  // 格式化发布日期显示
+  const formatPublishDate = (dateValue: string | number): string => {
+    if (typeof dateValue === 'string') {
+      return dateValue; // 如果是字符串，直接返回
+    }
+    if (typeof dateValue === 'number' && dateValue > 0) {
+      // 如果是数字格式（如20240315），转换为可读格式
+      const dateStr = dateValue.toString();
+      if (dateStr.length === 8) {
+        const year = dateStr.substring(0, 4);
+        const month = dateStr.substring(4, 6);
+        const day = dateStr.substring(6, 8);
+        return `发布于${year}年${parseInt(month)}月${parseInt(day)}日`;
+      }
+    }
+    return ''; // 无效日期返回空字符串
+  };
+  
+  const formattedPublishDate = formatPublishDate(publishDate);
 
   const handleClick = () => {
     try {
@@ -243,7 +263,7 @@ export const ContentCard: React.FC<ContentCardProps> = ({
             }}
           >
             <div className="text-4xl font-bold">
-              {content}
+              {typeof content === 'string' ? content : (content ? JSON.stringify(content) : '')}
             </div>
           </span>
         </div>
@@ -257,14 +277,9 @@ export const ContentCard: React.FC<ContentCardProps> = ({
                 {category}
               </span>
               <span className="text-[var(--color-btn)] px-3">
-                {publishDate}
+                {formattedPublishDate}
               </span>
             </div>
-            {enableISR && cacheStatus.lastFetch && (
-              <span className="text-xs text-gray-500" title={`最后更新: ${cacheStatus.lastFetch.toLocaleString()}`}>
-                缓存: {cacheStatus.isStale ? '已过期' : '有效'}
-              </span>
-            )}
           </div>
         </div>
       </div>
@@ -307,7 +322,7 @@ export const ContentCard: React.FC<ContentCardProps> = ({
               }}
             >
               <div className="text-4xl font-bold">
-                {content}
+                {typeof content === 'string' ? content : (content ? JSON.stringify(content) : '')}
               </div>
             </span>
           </div>
@@ -322,14 +337,9 @@ export const ContentCard: React.FC<ContentCardProps> = ({
                     {category}
                   </span>
                   <span className="text-[var(--color-btn)] px-3">
-                    {publishDate}
+                    {formattedPublishDate}
                   </span>
                 </div>
-                {enableISR && cacheStatus.lastFetch && (
-                  <span className="text-xs text-gray-500" title={`最后更新: ${cacheStatus.lastFetch.toLocaleString()}`}>
-                    缓存: {cacheStatus.isStale ? '已过期' : '有效'}
-                  </span>
-                )}
               </div>
             </div>
           </div>
@@ -373,7 +383,7 @@ export const ContentCard: React.FC<ContentCardProps> = ({
               }}
             >
               <div className="text-4xl font-bold">
-                {content}
+                {typeof content === 'string' ? content : (content ? JSON.stringify(content) : '')}
               </div>
             </span>
           </div>
@@ -384,14 +394,9 @@ export const ContentCard: React.FC<ContentCardProps> = ({
                 {category}
               </span>
               <span className="text-[var(--color-btn)] px-3">
-                {publishDate}
+                {formattedPublishDate}
               </span>
             </div>
-            {enableISR && cacheStatus.lastFetch && (
-              <span className="text-xs text-gray-500" title={`最后更新: ${cacheStatus.lastFetch.toLocaleString()}`}>
-                缓存: {cacheStatus.isStale ? '已过期' : '有效'}
-              </span>
-            )}
           </div>
         </div>
       </div>

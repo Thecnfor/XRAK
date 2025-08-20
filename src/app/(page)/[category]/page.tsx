@@ -2,12 +2,11 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getCategoryFromUrl, getAvailableCategories } from '@/lib/category-mapping-service'
-import { getBlogData as getBlogDataFromService, BlogDataPool } from '@/lib/blog-data-service'
+import { getBlogData as getBlogDataFromService } from '@/lib/blog-data-service'
 
 // 动态映射已移至 category-mapping-service
 
-// 使用统一的博客数据类型
-type BlogData = BlogDataPool 
+ 
 
 interface CategoryPageProps {
   params: Promise<{
@@ -162,7 +161,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                           </span>
                         </div>
                         
-                        {article.content && (
+                        {article.content && typeof article.content === 'string' && (
                           <p className="text-neutral-600 dark:text-neutral-400 line-clamp-2">
                             {article.content}
                           </p>

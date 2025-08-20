@@ -107,6 +107,7 @@ async function fetchBlogDataFromAPI(): Promise<BlogDataPool> {
         const category = categoryData as {
           title: string
           href: string
+          description?: string
           defaultArticle?: string
           articles?: Record<string, unknown>
         }
@@ -115,28 +116,37 @@ async function fetchBlogDataFromAPI(): Promise<BlogDataPool> {
           categoryInfo: {
             name: category.title,
             href: category.href,
-            description: category.title,
+            description: category.description || category.title,
             defaultArticle: category.defaultArticle
           },
           articles: category.articles ? Object.fromEntries(
             Object.entries(category.articles).map(([articleKey, article]: [string, unknown]) => {
               const articleData = article as {
-                title: string
-                publishDate: string
-                content: string
+                meta?: {
+                  title: string
+                  publishDate: string
+                  imagePath?: string
+                  category?: string
+                }
+                title?: string
+                publishDate?: string
                 imagePath?: string
                 category?: string
-                source?: string
+                content?: string
               }
+              
+              // 支持两种数据格式：带meta包装的和直接字段的
+              const meta = articleData.meta || articleData
+              
               return [
                 articleKey,
                 {
-                  imagePath: articleData.imagePath,
-                  title: articleData.title,
-                  category: articleData.category || category.title,
-                  publishDate: articleData.publishDate,
-                  content: articleData.content,
-                  source: articleData.source || 'api'
+                  imagePath: meta.imagePath,
+                  title: meta.title || `Article ${articleKey}`,
+                  category: meta.category || category.title,
+                  publishDate: meta.publishDate || new Date().toISOString(),
+                  content: articleData.content || '',
+                  source: 'api'
                 } as BlogArticle
               ]
             })
