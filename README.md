@@ -357,7 +357,7 @@ API_BASE_URL=https://api.example.com
 NEXT_PUBLIC_APP_URL=https://your-domain.com
 
 # ISR配置
-BLOG_API_URL=http://localhost:8000/api/blog-data
+BLOG_API_URL=http://192.168.1.137:8000/api/blog-data
 ISR_REVALIDATE_TIME=60
 ISR_STALE_TIME=300
 CACHE_REFRESH_TOKEN=your-secret-token

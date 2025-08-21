@@ -147,8 +147,8 @@ export const DEFAULT_CATEGORY_MAPPINGS = {
     'frontend': '前端',
     'ai': 'AI',
     'blockchain': '区块链',
-    'research': '研究',
-    'me': '个人简介'
+    'research': '研究'
+    // 注意：'me' 路径由静态路由处理，不应包含在动态分类映射中
   },
   
   categoryToUrl: {
@@ -157,8 +157,8 @@ export const DEFAULT_CATEGORY_MAPPINGS = {
     '前端': 'frontend',
     'AI': 'ai',
     '区块链': 'blockchain',
-    '研究': 'research',
-    '个人简介': 'me'
+    '研究': 'research'
+    // 注意：'个人简介' 对应的静态路由 /me，不应包含在动态分类映射中
   }
 } as const
 

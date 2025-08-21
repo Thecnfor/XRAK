@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getCacheConfig } from '@/config/isr-config';
 
@@ -168,41 +168,6 @@ export const ContentCard: React.FC<ContentCardProps> = ({
     }));
   }, [data?.lastUpdated, enableISR]);
 
-  // 缓存刷新处理
-  const handleCacheRefresh = useCallback(async () => {
-    if (!enableISR || !cacheKey || isRefreshing) return;
-
-    setIsRefreshing(true);
-    try {
-      const response = await fetch(`/api/revalidate?path=${encodeURIComponent(cacheKey)}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to refresh cache');
-      }
-
-      setCacheStatus(prev => ({
-        ...prev,
-        isStale: false,
-        lastFetch: new Date(),
-        retryCount: 0
-      }));
-    } catch (error) {
-      console.error('Cache refresh failed:', error);
-      setCacheStatus(prev => ({
-        ...prev,
-        retryCount: prev.retryCount + 1
-      }));
-      onError?.(error as Error);
-    } finally {
-      setIsRefreshing(false);
-    }
-  }, [enableISR, cacheKey, isRefreshing, onError]);
-  
   // 处理加载状态
   if (isLoading || isRefreshing) {
     return <LoadingCard variant={variant} className={className} />;
@@ -290,26 +255,6 @@ export const ContentCard: React.FC<ContentCardProps> = ({
     
     return (
       <div className={`cursor-pointer w-full h-full relative ${className}`} onClick={handleClick}>
-        {/* ISR缓存状态指示器 */}
-        {enableISR && cacheStatus.isStale && (
-          <div className="absolute top-2 right-2 z-10">
-            <div className="flex items-center space-x-1">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" title="缓存已过期" />
-              {cacheStatus.retryCount < 3 && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCacheRefresh();
-                  }}
-                  className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition-colors"
-                  title="刷新缓存"
-                >
-                  刷新
-                </button>
-              )}
-            </div>
-          </div>
-        )}
         <div className="w-full h-full flex items-center justify-start">
           <div className="aspect-[1/1] h-full rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-900">
             <span 
@@ -351,26 +296,6 @@ export const ContentCard: React.FC<ContentCardProps> = ({
   if (variant === 'project') {
     return (
       <div className={`group cursor-pointer relative ${className}`} onClick={handleClick}>
-        {/* ISR缓存状态指示器 */}
-        {enableISR && cacheStatus.isStale && (
-          <div className="absolute top-2 right-2 z-10">
-            <div className="flex items-center space-x-1">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" title="缓存已过期" />
-              {cacheStatus.retryCount < 3 && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCacheRefresh();
-                  }}
-                  className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition-colors"
-                  title="刷新缓存"
-                >
-                  刷新
-                </button>
-              )}
-            </div>
-          </div>
-        )}
         <div className="border border-gray-200 dark:border-zinc-800 rounded-lg p-6 transition-colors duration-200 dark:bg-black">
           <div className="aspect-[1/1] min-h-[4rem] rounded-lg overflow-hidden bg-neutral-100 dark:bg-neutral-900 mb-4">
             <span 

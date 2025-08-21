@@ -5,9 +5,6 @@ import { getCategoryFromUrl, getAvailableCategories } from '@/lib/category-mappi
 import { getBlogData as getBlogDataFromService } from '@/lib/blog-data-service'
 
 // 动态映射已移至 category-mapping-service
-
- 
-
 interface CategoryPageProps {
   params: Promise<{
     category: string
