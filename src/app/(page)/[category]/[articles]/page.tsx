@@ -7,6 +7,7 @@ import rehypeHighlight from 'rehype-highlight'
 import { getArticleContent, getCategoryContent } from '@/lib/content-service'
 import { getCategoryToUrlMapping } from '@/lib/category-mapping-service'
 import ArticleRenderer from '@/components/article/ArticleRenderer'
+import { ImageComponent } from '@/components/article/ImageComponent'
 
 interface BlogPageProps {
   params: Promise<{
@@ -164,62 +165,65 @@ export default async function BlogPage({ params }: BlogPageProps) {
                   rehypePlugins={[rehypeHighlight]}
                   components={{
                     h1: ({ children }) => (
-                      <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-6 mt-8">
+                      <h1 className="text-3xl font-bold mb-6 text-neutral-900 dark:text-neutral-100">
                         {children}
                       </h1>
                     ),
                     h2: ({ children }) => (
-                      <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-4 mt-8">
+                      <h2 className="text-2xl font-semibold mb-4 mt-8 text-neutral-800 dark:text-neutral-200">
                         {children}
                       </h2>
                     ),
                     h3: ({ children }) => (
-                      <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-3 mt-6">
+                      <h3 className="text-xl font-medium mb-3 mt-6 text-neutral-700 dark:text-neutral-300">
                         {children}
                       </h3>
                     ),
                     p: ({ children }) => (
-                      <p className="text-lg leading-relaxed text-neutral-800 dark:text-neutral-200 mb-4">
+                      <p className="mb-4 leading-relaxed text-neutral-700 dark:text-neutral-300">
                         {children}
                       </p>
                     ),
                     ul: ({ children }) => (
-                      <ul className="list-disc list-inside mb-4 text-lg text-neutral-800 dark:text-neutral-200">
+                      <ul className="list-disc list-inside mb-4 space-y-2 text-neutral-700 dark:text-neutral-300">
                         {children}
                       </ul>
                     ),
                     ol: ({ children }) => (
-                      <ol className="list-decimal list-inside mb-4 text-lg text-neutral-800 dark:text-neutral-200">
+                      <ol className="list-decimal list-inside mb-4 space-y-2 text-neutral-700 dark:text-neutral-300">
                         {children}
                       </ol>
                     ),
                     li: ({ children }) => (
-                      <li className="mb-1">
-                        {children}
-                      </li>
+                      <li className="leading-relaxed">{children}</li>
                     ),
                     blockquote: ({ children }) => (
-                      <blockquote className="border-l-4 border-neutral-300 dark:border-neutral-600 pl-4 italic text-neutral-700 dark:text-neutral-300 mb-4">
+                      <blockquote className="border-l-4 border-neutral-300 dark:border-neutral-600 pl-4 my-6 italic text-neutral-600 dark:text-neutral-400">
                         {children}
                       </blockquote>
+                    ),
+                    img: ({ src, alt }) => (
+                      <ImageComponent
+                        src={src || ''}
+                        alt={alt || ''}
+                        priority={false}
+                      />
                     ),
                     code: ({ children, className }) => {
                       const isInline = !className
                       return isInline ? (
-                        <code className="bg-neutral-100 dark:bg-neutral-800 px-1 py-0.5 rounded text-sm font-mono">
+                        <code className="bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded text-sm font-mono text-neutral-800 dark:text-neutral-200">
                           {children}
                         </code>
                       ) : (
-                        <code className={className}>
-                          {children}
-                        </code>
+                        <code className={className}>{children}</code>
                       )
                     },
                     pre: ({ children }) => (
-                      <pre className="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg overflow-x-auto mb-4">
+                      <pre className="bg-neutral-50 dark:bg-neutral-900 p-4 rounded-lg overflow-x-auto mb-6 border border-neutral-200 dark:border-neutral-700">
                         {children}
                       </pre>
-                    )
+                    ),
                   }}
                 >
                   {article.content}
