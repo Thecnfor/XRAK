@@ -200,11 +200,7 @@ export const ArticleRenderer: React.FC<ArticleRendererProps> = ({ content }) => 
   // 原有的blocks格式
   const articleContent = content as ArticleContent
   if (!articleContent.blocks) {
-    return (
-      <div className="prose-content">
-        <p className="text-neutral-500 dark:text-neutral-400">内容格式错误</p>
-      </div>
-    )
+    return null
   }
 
   return (

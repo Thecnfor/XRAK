@@ -3,6 +3,7 @@
 @import "../styles/components.css";
 @import "../styles/animate.css";
 @import "tw-animate-css";
+@import "highlight.js/styles/github.css";
 
 @custom-variant dark (&:is(.dark *));
 

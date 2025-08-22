@@ -1,6 +1,9 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeHighlight from 'rehype-highlight'
 import { getArticleContent, getCategoryContent } from '@/lib/content-service'
 import { getCategoryToUrlMapping } from '@/lib/category-mapping-service'
 import ArticleRenderer from '@/components/article/ArticleRenderer'
@@ -91,8 +94,6 @@ export default async function BlogPage({ params }: BlogPageProps) {
   // Next.js 15: 在使用前需要先解析params参数
   const resolvedParams = await params
   
-  // 过滤特殊路径（如Vite开发工具请求）
-  // 处理URL编码的情况，如 %40vite -> @vite
   const decodedCategory = decodeURIComponent(resolvedParams.category)
   if (resolvedParams.category.startsWith('@') || resolvedParams.category.startsWith('_') ||
       resolvedParams.category.startsWith('%40') || resolvedParams.category.startsWith('%5F') ||
@@ -118,8 +119,8 @@ export default async function BlogPage({ params }: BlogPageProps) {
               首页
             </Link>
             <span>/</span>
-            <Link 
-              href={categoryContent.categoryInfo.href} 
+            <Link
+              href={categoryContent.categoryInfo.href}
               className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
             >
               {categoryContent.categoryInfo.name}
@@ -157,8 +158,72 @@ export default async function BlogPage({ params }: BlogPageProps) {
             {article.structuredContent ? (
               <ArticleRenderer content={article.structuredContent} />
             ) : (
-              <div className="text-lg leading-relaxed text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap">
-                {article.content}
+              <div className="prose prose-lg prose-neutral dark:prose-invert max-w-none">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeHighlight]}
+                  components={{
+                    h1: ({ children }) => (
+                      <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-6 mt-8">
+                        {children}
+                      </h1>
+                    ),
+                    h2: ({ children }) => (
+                      <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-4 mt-8">
+                        {children}
+                      </h2>
+                    ),
+                    h3: ({ children }) => (
+                      <h3 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-3 mt-6">
+                        {children}
+                      </h3>
+                    ),
+                    p: ({ children }) => (
+                      <p className="text-lg leading-relaxed text-neutral-800 dark:text-neutral-200 mb-4">
+                        {children}
+                      </p>
+                    ),
+                    ul: ({ children }) => (
+                      <ul className="list-disc list-inside mb-4 text-lg text-neutral-800 dark:text-neutral-200">
+                        {children}
+                      </ul>
+                    ),
+                    ol: ({ children }) => (
+                      <ol className="list-decimal list-inside mb-4 text-lg text-neutral-800 dark:text-neutral-200">
+                        {children}
+                      </ol>
+                    ),
+                    li: ({ children }) => (
+                      <li className="mb-1">
+                        {children}
+                      </li>
+                    ),
+                    blockquote: ({ children }) => (
+                      <blockquote className="border-l-4 border-neutral-300 dark:border-neutral-600 pl-4 italic text-neutral-700 dark:text-neutral-300 mb-4">
+                        {children}
+                      </blockquote>
+                    ),
+                    code: ({ children, className }) => {
+                      const isInline = !className
+                      return isInline ? (
+                        <code className="bg-neutral-100 dark:bg-neutral-800 px-1 py-0.5 rounded text-sm font-mono">
+                          {children}
+                        </code>
+                      ) : (
+                        <code className={className}>
+                          {children}
+                        </code>
+                      )
+                    },
+                    pre: ({ children }) => (
+                      <pre className="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg overflow-x-auto mb-4">
+                        {children}
+                      </pre>
+                    )
+                  }}
+                >
+                  {article.content}
+                </ReactMarkdown>
               </div>
             )}
             
