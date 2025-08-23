@@ -29,7 +29,7 @@ export async function generateStaticParams() {
     })
     
     if (!response.ok) {
-      console.error('Failed to fetch categories for static params')
+      console.error('获取静态参数的分类数据失败')
       return []
     }
     

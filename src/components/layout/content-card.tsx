@@ -133,9 +133,9 @@ const ErrorCard: React.FC<{ variant: 'recommend' | 'news' | 'project'; className
   return null;
 };
 
-export const ContentCard: React.FC<ContentCardProps> = ({ 
-  data, 
-  variant, 
+export const ContentCard: React.FC<ContentCardProps> = ({
+  data,
+  variant,
   className = '',
   href,
   isLoading = false,
@@ -149,11 +149,16 @@ export const ContentCard: React.FC<ContentCardProps> = ({
     lastFetch: null,
     retryCount: 0
   });
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isRefreshing] = useState(false);
 
   // ISR缓存检查
   useEffect(() => {
-    if (!enableISR || !data?.lastUpdated) return;
+    if (!enableISR || !data?.lastUpdated) {
+      if (process.env.NODE_ENV === 'development' && !data?.lastUpdated) {
+        console.log('[ContentCard] No lastUpdated data for ISR check:', { title: data?.title, variant });
+      }
+      return;
+    }
 
     const config = getCacheConfig();
     const lastUpdated = new Date(data.lastUpdated);
@@ -161,20 +166,46 @@ export const ContentCard: React.FC<ContentCardProps> = ({
     const timeDiff = now.getTime() - lastUpdated.getTime();
     const isStale = timeDiff > config.defaultRevalidateTime * 1000;
 
-    setCacheStatus(prev => ({
-      ...prev,
-      isStale,
-      lastFetch: lastUpdated
-    }));
-  }, [data?.lastUpdated, enableISR]);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[ContentCard] ISR cache check:', {
+        title: data.title,
+        variant,
+        lastUpdated: data.lastUpdated,
+        timeDiff: Math.round(timeDiff / 1000),
+        revalidateTime: config.defaultRevalidateTime,
+        isStale,
+        cacheKey
+      });
+    }
+
+    setCacheStatus(prev => {
+      const newStatus = {
+        ...prev,
+        isStale,
+        lastFetch: lastUpdated
+      };
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[ContentCard] Cache status updated:', newStatus);
+      }
+      
+      return newStatus;
+    });
+  }, [data?.lastUpdated, enableISR, cacheKey, variant, data?.title]);
 
   // 处理加载状态
   if (isLoading || isRefreshing) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[ContentCard] Showing loading state:', { variant, isLoading, isRefreshing });
+    }
     return <LoadingCard variant={variant} className={className} />;
   }
   
   // 处理数据为空的情况
   if (!data || !data.title) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[ContentCard] No data or title:', { variant, hasData: !!data, title: data?.title, cacheStatus });
+    }
     return <ErrorCard variant={variant} className={className} />;
   }
   

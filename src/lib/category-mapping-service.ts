@@ -18,7 +18,6 @@ interface CategoryMappingCache {
 class CategoryMappingService {
   private cache: CategoryMappingCache | null = null
   private readonly CACHE_TTL = getMappingConfig().cache.ttl * 1000 // 转换为毫秒
-  private readonly CACHE_KEY = 'category-mapping-cache'
 
   /**
    * 从数据源动态生成映射关系
@@ -31,19 +30,28 @@ class CategoryMappingService {
       const blogData = await getBlogData()
       const urlToCategory: Record<string, string> = {}
       const categoryToUrl: Record<string, string> = {}
-
+      
+      // 定义静态路由路径，这些路径不应该被动态路由处理
+      const STATIC_ROUTES = ['me', 'api'] // 添加其他静态路由路径
+      
       // 从 blogInfoPool 中提取映射关系
       Object.entries(blogData.blogInfoPool).forEach(([categoryKey, categoryData]) => {
         if (categoryData.categoryInfo?.href) {
           // 从 href 中提取 URL 路径 (例如: "/tech" -> "tech")
           const urlPath = categoryData.categoryInfo.href.replace(/^\//, '')
           
+          // 跳过静态路由路径
+          if (STATIC_ROUTES.includes(urlPath)) {
+            console.log(`Skipping static route: ${urlPath}`)
+            return
+          }
+          
           // 建立双向映射
           urlToCategory[urlPath] = categoryKey
           categoryToUrl[categoryKey] = urlPath
         }
       })
-
+      
       return { urlToCategory, categoryToUrl }
     } catch (error) {
       console.error('Failed to generate mappings from data:', error)

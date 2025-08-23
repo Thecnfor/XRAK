@@ -60,12 +60,26 @@ function getDataSourceUrl(): string {
  * 检查缓存是否有效
  */
 function isCacheValid(): boolean {
-  if (!cachedData || !cacheTimestamp) return false
+  if (!cachedData || !cacheTimestamp) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[BlogDataService] Cache invalid: no data or timestamp')
+    }
+    return false
+  }
   
   const now = Date.now()
   const cacheAge = (now - cacheTimestamp) / 1000
+  const isValid = cacheAge < CACHE_CONFIG.revalidate
   
-  return cacheAge < CACHE_CONFIG.revalidate
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[BlogDataService] Cache check:', {
+      cacheAge: Math.round(cacheAge),
+      revalidateTime: CACHE_CONFIG.revalidate,
+      isValid
+    })
+  }
+  
+  return isValid
 }
 
 /**
@@ -188,7 +202,14 @@ async function fetchBlogDataFromLocal(): Promise<BlogDataPool> {
 export async function getBlogData(): Promise<BlogDataPool> {
   // 检查缓存是否有效
   if (isCacheValid() && cachedData) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[BlogDataService] Using cached data')
+    }
     return cachedData
+  }
+  
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[BlogDataService] Fetching fresh data from API...')
   }
   
   try {
@@ -199,14 +220,21 @@ export async function getBlogData(): Promise<BlogDataPool> {
     cachedData = freshData
     cacheTimestamp = Date.now()
     
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[BlogDataService] Cache updated with fresh API data:', {
+        categoriesCount: Object.keys(freshData.blogInfoPool).length,
+        timestamp: new Date().toISOString()
+      })
+    }
+    
     return freshData
   } catch (error) {
     // API失败时的降级策略
-    console.warn('API fetch failed, attempting fallback strategies:', error)
+    console.warn('[BlogDataService] API fetch failed, attempting fallback strategies:', error)
     
     // 如果有过期缓存，先返回过期数据
     if (canUseStaleCache() && cachedData) {
-      console.log('Using stale cache while attempting background refresh')
+      console.log('[BlogDataService] Using stale cache while attempting background refresh')
       
       // 后台异步刷新（不等待结果）
       setTimeout(async () => {
@@ -214,8 +242,11 @@ export async function getBlogData(): Promise<BlogDataPool> {
           const refreshedData = await fetchBlogDataFromAPI()
           cachedData = refreshedData
           cacheTimestamp = Date.now()
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[BlogDataService] Background refresh completed')
+          }
         } catch (bgError) {
-          console.error('Background refresh failed:', bgError)
+          console.error('[BlogDataService] Background refresh failed:', bgError)
         }
       }, 0)
       
@@ -224,16 +255,22 @@ export async function getBlogData(): Promise<BlogDataPool> {
     
     // 最后的降级：使用本地数据
     try {
-      console.log('Falling back to local data')
+      console.log('[BlogDataService] Falling back to local data')
       const localData = await fetchBlogDataFromLocal()
       
       // 缓存本地数据
       cachedData = localData
       cacheTimestamp = Date.now()
       
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[BlogDataService] Using local fallback data:', {
+          categoriesCount: Object.keys(localData.blogInfoPool).length
+        })
+      }
+      
       return localData
     } catch (localError) {
-      console.error('All data sources failed:', localError)
+      console.error('[BlogDataService] All data sources failed:', localError)
       throw new Error('Unable to load blog data from any source')
     }
   }
