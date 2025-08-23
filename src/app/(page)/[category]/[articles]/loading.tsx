@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div className="min-h-screen bg-white text-neutral-900 dark:bg-black dark:text-neutral-100 flex items-center justify-center">
+    <div className="max-h-screen h-full bg-white text-neutral-900 dark:bg-black dark:text-neutral-100 flex items-center justify-center">
       <div className="text-center space-y-8 px-4 max-w-md">
         {/* 加载动画 */}
         <div className="space-y-4">

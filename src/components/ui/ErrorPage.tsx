@@ -56,7 +56,7 @@ export default function ErrorPage({
   }, [autoRetry, retryInterval, retryCount])
 
   return (
-    <div className="min-h-screen bg-white text-neutral-900 dark:bg-black dark:text-neutral-100 flex items-center justify-center">
+    <div className="max-h-screen h-full bg-white text-neutral-900 dark:bg-black dark:text-neutral-100 flex items-center justify-center">
       <div className="text-center space-y-8 px-4 max-w-md">
         {/* 错误图标 */}
         <div className="space-y-4">
