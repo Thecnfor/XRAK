@@ -204,8 +204,8 @@ export default async function BlogPage({ params }: BlogPageProps) {
                     ),
                     img: ({ src, alt }) => (
                       <ImageComponent
-                        src={src || ''}
-                        alt={alt || ''}
+                        src={typeof src === 'string' ? src : ''}
+                        alt={typeof alt === 'string' ? alt : ''}
                         priority={false}
                       />
                     ),
