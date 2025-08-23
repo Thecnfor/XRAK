@@ -371,7 +371,7 @@ const Nav = () => {
                         <NavigationSkeleton itemCount={5} isMobile={false} />
                         <CacheStatusIndicator cacheStatus={cacheStatus} showDetails={process.env.NODE_ENV === 'development'} />
                       </div>
-                    ) : hasError ? (
+                    ) : hasError && navigationData.length === 0 ? (
                       <div className="text-nav-mobile space-y-4 font-medium md:text-nav-desktop">
                         <NavigationError 
                           onRetry={refetch} 
@@ -450,7 +450,7 @@ const Nav = () => {
                     <NavigationSkeleton itemCount={6} isMobile={true} />
                     <CacheStatusIndicator cacheStatus={cacheStatus} showDetails={process.env.NODE_ENV === 'development'} />
                   </>
-                ) : hasError ? (
+                ) : hasError && navigationData.length === 0 ? (
                   <NavigationError 
                     onRetry={refetch} 
                     showRefresh={true} 
