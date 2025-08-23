@@ -42,6 +42,11 @@ export function useNavigationData(): UseNavigationDataReturn {
 
   const loadNavigationData = useCallback(async (forceRefresh = false) => {
     try {
+      // 如果已有数据且不是强制刷新，跳过加载
+      if (!forceRefresh && !isInitialLoad && navigationData.length > 0 && !hasError) {
+        return
+      }
+      
       // 只在初次加载或强制刷新时显示loading状态
       if (isInitialLoad || forceRefresh) {
         setIsLoading(true)
@@ -143,29 +148,51 @@ export function useNavigationData(): UseNavigationDataReturn {
     loadNavigationData()
   }, [loadNavigationData])
 
-  // 定期检查缓存状态和过期时间
+  // 页面可见性变化时的优化处理
   useEffect(() => {
+    const handleVisibilityChange = () => {
+      // 页面从隐藏变为可见时，检查是否需要刷新数据
+      if (document.visibilityState === 'visible' && navigationCacheState.isStale && !isLoading) {
+        // 静默刷新，不显示loading状态
+        loadNavigationData(false)
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [navigationCacheState.isStale, isLoading, loadNavigationData])
+
+  // 优化的缓存状态检查 - 减少频率，避免页面跳转时的干扰
+  useEffect(() => {
+    // 只在有数据且无错误时才启动定期检查
+    if (hasError || isLoading || navigationData.length === 0) {
+      return
+    }
+
     const interval = setInterval(() => {
-      setCacheStatus(getCacheStatus())
-      
-      // 检查导航缓存是否过期
-      if (navigationCacheState.lastFetch) {
-        const config = getCacheConfig()
-        const now = new Date()
-        const timeDiff = now.getTime() - navigationCacheState.lastFetch.getTime()
-        const isStale = timeDiff > config.defaultRevalidateTime * 1000
+      // 只在页面可见时更新缓存状态
+      if (document.visibilityState === 'visible') {
+        setCacheStatus(getCacheStatus())
         
-        if (isStale !== navigationCacheState.isStale) {
-          setNavigationCacheState(prev => ({
-            ...prev,
-            isStale
-          }))
+        // 检查导航缓存是否过期
+        if (navigationCacheState.lastFetch) {
+          const config = getCacheConfig()
+          const now = new Date()
+          const timeDiff = now.getTime() - navigationCacheState.lastFetch.getTime()
+          const isStale = timeDiff > config.defaultRevalidateTime * 1000
+          
+          if (isStale !== navigationCacheState.isStale) {
+            setNavigationCacheState(prev => ({
+              ...prev,
+              isStale
+            }))
+          }
         }
       }
-    }, 5000) // 每5秒更新一次缓存状态
+    }, 30000) // 减少到每30秒检查一次，降低干扰
 
     return () => clearInterval(interval)
-  }, [navigationCacheState.lastFetch, navigationCacheState.isStale])
+  }, [navigationCacheState.lastFetch, navigationCacheState.isStale, hasError, isLoading, navigationData.length])
 
   return {
     navigationData,
