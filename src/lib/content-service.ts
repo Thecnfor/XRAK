@@ -69,38 +69,38 @@ export interface DetailedCategory {
  */
 const API_ROUTES = {
   // 基础 API 地址（统一指向博客API服务）
-  BASE_URL: 'http://192.168.1.137:8000/api',
+  BASE_URL: 'http://localhost:8000/api',
   
   // 博客数据路由
   BLOG_DATA: {
-    // 获取所有博客数据: GET http://192.168.1.137:8000/api/blog-data
-    GET_ALL: 'http://192.168.1.137:8000/api/blog-data',
-    // 刷新缓存: POST http://192.168.1.137:8000/api/blog-data/refresh
-    REFRESH: 'http://192.168.1.137:8000/api/blog-data/refresh'
+    // 获取所有博客数据: GET http://localhost:8000/api/blog-data
+    GET_ALL: 'http://localhost:8000/api/blog-data',
+    // 刷新缓存: POST http://localhost:8000/api/blog-data/refresh
+    REFRESH: 'http://localhost:8000/api/blog-data/refresh'
   },
   
   // 文章路由
   ARTICLES: {
-    // 获取文章详情: GET http://192.168.1.137:8000/api/articles/{categoryKey}/{articleId}
-    GET_ARTICLE: (categoryKey: string, articleId: string) => `http://192.168.1.137:8000/api/articles/${categoryKey}/${articleId}`,
-    // 获取文章列表: GET http://192.168.1.137:8000/api/articles/{categoryKey}
-    GET_ARTICLES: (categoryKey: string) => `http://192.168.1.137:8000/api/articles/${categoryKey}`
+    // 获取文章详情: GET http://localhost:8000/api/articles/{categoryKey}/{articleId}
+    GET_ARTICLE: (categoryKey: string, articleId: string) => `http://localhost:8000/api/articles/${categoryKey}/${articleId}`,
+    // 获取文章列表: GET http://localhost:8000/api/articles/{categoryKey}
+    GET_ARTICLES: (categoryKey: string) => `http://localhost:8000/api/articles/${categoryKey}`
   },
   
   // 分类路由
   CATEGORIES: {
-    // 获取所有分类: GET http://192.168.1.137:8000/api/categories
-    GET_ALL: 'http://192.168.1.137:8000/api/categories',
-    // 获取分类详情: GET http://192.168.1.137:8000/api/categories/{categoryKey}
-    GET_CATEGORY: (categoryKey: string) => `http://192.168.1.137:8000/api/categories/${categoryKey}`
+    // 获取所有分类: GET http://localhost:8000/api/categories
+    GET_ALL: 'http://localhost:8000/api/categories',
+    // 获取分类详情: GET http://localhost:8000/api/categories/{categoryKey}
+    GET_CATEGORY: (categoryKey: string) => `http://localhost:8000/api/categories/${categoryKey}`
   },
   
   // 内容管理路由（后台使用）
   CONTENT: {
-    // 预热缓存: POST http://192.168.1.137:8000/api/content/preload
-    PRELOAD: 'http://192.168.1.137:8000/api/content/preload',
-    // 清除缓存: DELETE http://192.168.1.137:8000/api/content/cache
-    CLEAR_CACHE: 'http://192.168.1.137:8000/api/content/cache'
+    // 预热缓存: POST http://localhost:8000/api/content/preload
+    PRELOAD: 'http://localhost:8000/api/content/preload',
+    // 清除缓存: DELETE http://localhost:8000/api/content/cache
+    CLEAR_CACHE: 'http://localhost:8000/api/content/cache'
   }
 } as const
 

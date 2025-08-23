@@ -20,7 +20,7 @@ interface BlogPageProps {
 export async function generateStaticParams() {
   try {
     // 通过API获取所有分类数据
-    const response = await fetch('http://192.168.1.137:8000/api/categories', {
+    const response = await fetch('http://localhost:8000/api/categories', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
