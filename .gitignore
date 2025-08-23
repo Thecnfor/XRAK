@@ -37,6 +37,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# 项目配置
+.env.*
+# 环境变量配置
+.env.local
+.env.production
 
 # docs
 /example
