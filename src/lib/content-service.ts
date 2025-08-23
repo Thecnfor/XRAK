@@ -118,7 +118,8 @@ export async function getArticleContent(
       headers: {
         'Content-Type': 'application/json',
       },
-      cache: 'default'
+      cache: 'no-store', // 禁用缓存以确保错误恢复
+      next: { revalidate: 0 } // 每次都重新验证
     })
     
     if (response.ok) {
@@ -175,7 +176,8 @@ export async function getCategoryContent(categoryKey: string): Promise<{
       headers: {
         'Content-Type': 'application/json',
       },
-      cache: 'default'
+      cache: 'no-store', // 禁用缓存以确保错误恢复
+      next: { revalidate: 0 } // 每次都重新验证
     })
     
     if (response.ok) {
