@@ -37,9 +37,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# 项目配置
-.env.*
-
 # docs
 /example
 /.trae
