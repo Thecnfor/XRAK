@@ -32,7 +32,7 @@ export default function ErrorPage({
     const checkServerStatus = async () => {
       try {
         setIsRetrying(true)
-        const response = await fetch('/api/health-check', {
+        const response = await fetch('/api/health', {
           method: 'HEAD',
           cache: 'no-store'
         })

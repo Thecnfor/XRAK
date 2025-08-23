@@ -123,7 +123,8 @@ export async function getArticleContent(
     })
     
     if (response.ok) {
-      const articleData = await response.json()
+      const responseData = await response.json()
+      const articleData = responseData.data // 提取data字段
       // 转换为 DetailedArticle 格式
       return {
         title: articleData.title,
@@ -181,34 +182,45 @@ export async function getCategoryContent(categoryKey: string): Promise<{
     })
     
     if (response.ok) {
-      const categoryData = await response.json()
+      const responseData = await response.json()
+      const categoryData = responseData.data // 提取data字段
       
       // 转换文章数据为 DetailedArticle 格式
-       const articles: DetailedArticle[] = categoryData.articles.map((article: {
-         title: string;
-         category: string;
-         publishDate: string;
-         content: string;
-         excerpt?: string;
-         imagePath?: string;
-         tags?: string[];
-         readTime?: string;
-         author?: string;
-       }) => ({
-         title: article.title,
-         category: article.category,
-         publishDate: article.publishDate,
-         content: article.content,
-         excerpt: article.excerpt || article.content?.slice(0, 200) || '',
-         imagePath: article.imagePath,
-         tags: article.tags || [],
-         readTime: article.readTime || '5分钟',
-         author: article.author || '未知作者',
-         source: '统一博客API服务'
-       }))
+      // articles是一个对象，需要转换为数组
+      const articles: DetailedArticle[] = Object.values(categoryData.articles || {}).map((article) => {
+         const typedArticle = article as {
+           id?: string;
+           title: string;
+           category?: string;
+           publishDate: string;
+           content: string;
+           excerpt?: string;
+           imagePath?: string;
+           tags?: string[];
+           readTime?: string;
+           author?: string;
+         }
+         return {
+           title: typedArticle.title,
+           category: typedArticle.category || categoryKey,
+           publishDate: typedArticle.publishDate,
+           content: typedArticle.content,
+           excerpt: typedArticle.excerpt || typedArticle.content?.slice(0, 200) || '',
+           imagePath: typedArticle.imagePath,
+           tags: typedArticle.tags || [],
+           readTime: typedArticle.readTime || '5分钟',
+           author: typedArticle.author || '未知作者',
+           source: '统一博客API服务'
+         }
+       })
       
       return {
-        categoryInfo: categoryData.categoryInfo,
+        categoryInfo: {
+          name: categoryData.title,
+          href: categoryData.href,
+          description: categoryData.description || '',
+          defaultArticle: categoryData.defaultArticle
+        },
         articles
       }
     } else {

@@ -116,57 +116,93 @@ async function fetchBlogDataFromAPI(): Promise<BlogDataPool> {
     // 转换原始数据为BlogDataPool格式
     const blogInfoPool: Record<string, BlogCategory> = {}
     
-    if (rawData && typeof rawData === 'object' && rawData.categories) {
-      Object.entries(rawData.categories).forEach(([categoryKey, categoryData]: [string, unknown]) => {
-        const category = categoryData as {
-          title: string
-          href: string
-          description?: string
-          defaultArticle?: string
-          articles?: Record<string, unknown>
+    // 检查是否是单篇文章的响应格式：{"success":true,"data":{"id":"1","title":"..."}}
+    if (rawData?.success && rawData?.data && rawData?.data?.id) {
+      // 这是单篇文章的响应，需要构造分类结构
+      const articleData = rawData.data
+      const categoryKey = articleData.category || 'default'
+      
+      blogInfoPool[categoryKey] = {
+        categoryInfo: {
+          name: categoryKey === 'tech' ? '技术分享' : categoryKey === 'life' ? '生活随笔' : '默认分类',
+          href: `/${categoryKey}`,
+          description: categoryKey === 'tech' ? '技术分享' : categoryKey === 'life' ? '生活随笔' : '默认分类',
+          defaultArticle: `/${categoryKey}/${articleData.id}`
+        },
+        articles: {
+          [articleData.id]: {
+            imagePath: articleData.imagePath || '',
+            title: articleData.title || `Article ${articleData.id}`,
+            category: articleData.category || categoryKey,
+            publishDate: articleData.publishDate || new Date().toISOString(),
+            content: articleData.content || '',
+            source: 'api'
+          } as BlogArticle
         }
-        
-        blogInfoPool[categoryKey] = {
-          categoryInfo: {
+      }
+    } else {
+      // 适配分类数据格式：{"success":true,"data":{"categories":{...}}}
+      const categories = rawData?.data?.categories || rawData?.categories || rawData?.blogInfoPool
+      
+      if (categories && typeof categories === 'object') {
+        Object.entries(categories).forEach(([categoryKey, categoryData]: [string, unknown]) => {
+          const category = categoryData as {
+            title: string
+            href: string
+            hasSubmenu?: boolean
+            defaultArticle?: string
+            articles?: Record<string, unknown>
+            categoryInfo?: {
+              name: string
+              href: string
+              description?: string
+              defaultArticle?: string
+            }
+          }
+          
+          // 支持两种格式：直接的category对象或包含categoryInfo的对象
+          const categoryInfo = category.categoryInfo || {
             name: category.title,
             href: category.href,
-            description: category.description || category.title,
+            description: category.title,
             defaultArticle: category.defaultArticle
-          },
-          articles: category.articles ? Object.fromEntries(
-            Object.entries(category.articles).map(([articleKey, article]: [string, unknown]) => {
-              const articleData = article as {
-                meta?: {
-                  title: string
-                  publishDate: string
+          }
+          
+          blogInfoPool[categoryKey] = {
+            categoryInfo: {
+              name: categoryInfo.name,
+              href: categoryInfo.href,
+              description: categoryInfo.description || categoryInfo.name, // 确保description始终有值
+              defaultArticle: categoryInfo.defaultArticle
+            },
+            articles: category.articles ? Object.fromEntries(
+              Object.entries(category.articles).map(([articleKey, article]: [string, unknown]) => {
+                const articleData = article as {
+                  id?: string
+                  title?: string
+                  publishDate?: string
+                  content?: string
+                  blocks?: unknown[]
                   imagePath?: string
                   category?: string
                 }
-                title?: string
-                publishDate?: string
-                imagePath?: string
-                category?: string
-                content?: string
-              }
-              
-              // 支持两种数据格式：带meta包装的和直接字段的
-              const meta = articleData.meta || articleData
-              
-              return [
-                articleKey,
-                {
-                  imagePath: meta.imagePath,
-                  title: meta.title || `Article ${articleKey}`,
-                  category: meta.category || category.title,
-                  publishDate: meta.publishDate || new Date().toISOString(),
-                  content: articleData.content || '',
-                  source: 'api'
-                } as BlogArticle
-              ]
-            })
-          ) : {}
-        }
-      })
+                
+                return [
+                  articleKey,
+                  {
+                    imagePath: articleData.imagePath || '',
+                    title: articleData.title || `Article ${articleKey}`,
+                    category: articleData.category || categoryInfo.name,
+                    publishDate: articleData.publishDate || new Date().toISOString(),
+                    content: articleData.content || '',
+                    source: 'api'
+                  } as BlogArticle
+                ]
+              })
+            ) : {}
+          }
+        })
+      }
     }
     
     return { blogInfoPool }
