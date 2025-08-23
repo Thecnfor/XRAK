@@ -4,6 +4,12 @@ import { TextAnimate } from "@/components/magicui/text-animate";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { ContentCard } from "@/components/layout/content-card";
 import { generateRecommendCardData, generateNewsCardData } from "@/lib/content-classifier";
+import { ISR_CONFIG } from "@/config/isr-config";
+
+// ISR配置导出 - Next.js要求直接导出数值
+export const revalidate = 60; // ISR_CONFIG.BLOG_DATA.revalidate
+export const dynamic = 'force-static';
+export const dynamicParams = true;
 
 export default async function Home() {
   // 异步获取卡片数据
@@ -11,6 +17,15 @@ export default async function Home() {
     generateRecommendCardData(),
     generateNewsCardData()
   ]);
+
+  // 开发环境下添加调试信息
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[Homepage] Data fetched:', {
+      recommendCount: recommendCardData.length,
+      newsCount: newsCardData.length,
+      timestamp: new Date().toISOString()
+    });
+  }
 
   return (
     <>

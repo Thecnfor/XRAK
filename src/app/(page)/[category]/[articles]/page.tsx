@@ -20,7 +20,7 @@ interface BlogPageProps {
 export async function generateStaticParams() {
   try {
     // 通过API获取所有分类数据
-    const response = await fetch('http://192.168.1.137:8000/api/categories', {
+    const response = await fetch('http://localhost:8000/api/categories', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -29,7 +29,7 @@ export async function generateStaticParams() {
     })
     
     if (!response.ok) {
-      console.error('Failed to fetch categories for static params')
+      console.error('获取静态参数的分类数据失败')
       return []
     }
     
