@@ -40,14 +40,15 @@ export async function generateStaticParams() {
       return []
     }
     
-    const data = await response.json()
+    const responseData = await response.json()
+    const data = responseData.data // 提取data字段
     const params: { category: string; articles: string }[] = []
     
     // 获取动态映射
     const categoryUrlMap = await getCategoryToUrlMapping()
     
     // 遍历所有分类和文章
-    const categories = data.categories || {}
+    const categories = data.blogInfoPool || {}
     for (const [categoryKey, categoryData] of Object.entries(categories)) {
       const category = categoryData as {
         articles?: Record<string, { id: string; title: string; [key: string]: unknown }>
