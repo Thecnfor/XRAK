@@ -4,6 +4,12 @@ import { TextAnimate } from "@/components/magicui/text-animate";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { ContentCard } from "@/components/layout/content-card";
 import { generateRecommendCardData, generateNewsCardData } from "@/lib/content-classifier";
+import { ISR_CONFIG } from "@/config/isr-config";
+
+// ISR配置导出 - Next.js要求直接导出数值
+export const revalidate = 60; // ISR_CONFIG.BLOG_DATA.revalidate
+export const dynamic = 'force-static';
+export const dynamicParams = true;
 
 export default async function Home() {
   // 异步获取卡片数据
@@ -11,6 +17,15 @@ export default async function Home() {
     generateRecommendCardData(),
     generateNewsCardData()
   ]);
+
+  // 开发环境下添加调试信息
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[Homepage] Data fetched:', {
+      recommendCount: recommendCardData.length,
+      newsCount: newsCardData.length,
+      timestamp: new Date().toISOString()
+    });
+  }
 
   return (
     <>
@@ -70,7 +85,7 @@ export default async function Home() {
 const Hero = () => {
   return(
     <div className="group relative md:aspect-[16/9] aspect-[3/4] rounded-lg @lg:col-span-3 @lg:sticky top-0 @lg:mb-0 @md:mb-20 mb-5 mt-10 cursor-pointer">
-      <div className="relative h-full w-full rounded-2xl grid grid-rows-[auto_1fr_auto] bg-[var(--color-card)] overflow-hidden">
+      <div className="relative h-full w-full rounded-2xl grid grid-rows-[auto_1fr_auto] overflow-hidden">
         <div className="absolute w-full h-full transformCard">
           <AuroraBackground className="group-hover:scale-110 transition-all duration-300">
             <span className="@md:text-[5rem] text-5xl font-thin text-[var(--color-text)] whitespace-nowrap flex-nowrap">

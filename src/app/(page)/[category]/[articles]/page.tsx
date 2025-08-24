@@ -8,6 +8,7 @@ import { getArticleContent, getCategoryContent } from '@/lib/content-service'
 import { getCategoryToUrlMapping } from '@/lib/category-mapping-service'
 import ArticleRenderer from '@/components/article/ArticleRenderer'
 import { ImageComponent } from '@/components/article/ImageComponent'
+import ErrorPage from '@/components/ui/ErrorPage'
 
 interface BlogPageProps {
   params: Promise<{
@@ -19,28 +20,35 @@ interface BlogPageProps {
 // 生成静态参数
 export async function generateStaticParams() {
   try {
+    // 检查是否在构建时或开发环境
+    const isProduction = process.env.NODE_ENV === 'production'
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+    
     // 通过API获取所有分类数据
-    const response = await fetch('http://192.168.1.137:8000/api/categories', {
+    const response = await fetch(`${baseUrl}/api/categories`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      cache: 'default'
+      cache: 'default',
+      // 在生产环境中设置超时
+      ...(isProduction && { signal: AbortSignal.timeout(5000) })
     })
     
     if (!response.ok) {
-      console.error('Failed to fetch categories for static params')
+      console.warn('获取静态参数的分类数据失败，返回空数组')
       return []
     }
     
-    const data = await response.json()
+    const responseData = await response.json()
+    const data = responseData.data // 提取data字段
     const params: { category: string; articles: string }[] = []
     
     // 获取动态映射
     const categoryUrlMap = await getCategoryToUrlMapping()
     
     // 遍历所有分类和文章
-    const categories = data.categories || {}
+    const categories = data.blogInfoPool || {}
     for (const [categoryKey, categoryData] of Object.entries(categories)) {
       const category = categoryData as {
         articles?: Record<string, { id: string; title: string; [key: string]: unknown }>
@@ -56,59 +64,71 @@ export async function generateStaticParams() {
       }
     }
     
+    console.log(`生成了 ${params.length} 个静态参数`)
     return params
   } catch (error) {
-    console.error('Error generating static params:', error)
+    console.warn('生成静态参数时出错，返回空数组:', (error as Error).message)
+    // 在没有服务器时返回空数组，让动态路由处理
     return []
   }
 }
 
 // 生成元数据
 export async function generateMetadata({ params }: BlogPageProps): Promise<Metadata> {
-  const resolvedParams = await params
-  const article = await getArticleContent(resolvedParams.category, resolvedParams.articles)
-  
-  if (!article) {
-    return {
-      title: '文章未找到',
-      description: '请求的文章不存在'
+  try {
+    const resolvedParams = await params
+    const article = await getArticleContent(resolvedParams.category, resolvedParams.articles)
+    
+    if (!article) {
+      return {
+        title: '文章未找到',
+        description: '请求的文章不存在'
+      }
     }
-  }
-  
-  return {
-    title: `${article.title}`,
-    description: article.excerpt || article.content?.substring(0, 160) || '技术博客文章',
-    keywords: article.tags?.join(', ') || '技术,博客',
-    authors: [{ name: article.author || 'XRAK' }],
-    openGraph: {
-      title: article.title,
-      description: article.excerpt || article.content?.substring(0, 160),
-      type: 'article',
-      publishedTime: article.publishDate,
-      authors: [article.author || 'XRAK'],
-      tags: article.tags
+    
+    return {
+      title: `${article.title}`,
+      description: article.excerpt || article.content?.substring(0, 160) || '技术博客文章',
+      keywords: article.tags?.join(', ') || '技术,博客',
+      authors: [{ name: article.author || 'XRAK' }],
+      openGraph: {
+        title: article.title,
+        description: article.excerpt || article.content?.substring(0, 160),
+        type: 'article',
+        publishedTime: article.publishDate,
+        authors: [article.author || 'XRAK'],
+        tags: article.tags
+      }
+    }
+  } catch (error) {
+    console.error('生成元数据时出错:', error)
+    return {
+      title: '服务暂时不可用 - XRAK',
+      description: '页面加载时遇到了问题，请稍后再试。',
+      keywords: '技术,博客,XRAK'
     }
   }
 }
 
 export default async function BlogPage({ params }: BlogPageProps) {
-  // Next.js 15: 在使用前需要先解析params参数
-  const resolvedParams = await params
-  
-  const decodedCategory = decodeURIComponent(resolvedParams.category)
-  if (resolvedParams.category.startsWith('@') || resolvedParams.category.startsWith('_') ||
-      resolvedParams.category.startsWith('%40') || resolvedParams.category.startsWith('%5F') ||
-      decodedCategory.startsWith('@') || decodedCategory.startsWith('_')) {
-    notFound()
-  }
-  
-  // 使用增强的内容获取服务
-  const article = await getArticleContent(resolvedParams.category, resolvedParams.articles)
-  const categoryContent = await getCategoryContent(resolvedParams.category)
-  
-  if (!article) {
-    notFound()
-  }
+  try {
+    // Next.js 15: 在使用前需要先解析params参数
+    const resolvedParams = await params
+    
+    const decodedCategory = decodeURIComponent(resolvedParams.category)
+    if (resolvedParams.category.startsWith('@') || resolvedParams.category.startsWith('_') ||
+        resolvedParams.category.startsWith('%40') || resolvedParams.category.startsWith('%5F') ||
+        decodedCategory.startsWith('@') || decodedCategory.startsWith('_')) {
+      notFound()
+    }
+    
+    // 使用增强的内容获取服务
+    const article = await getArticleContent(resolvedParams.category, resolvedParams.articles)
+    const categoryContent = await getCategoryContent(resolvedParams.category)
+    
+    if (!article) {
+      notFound()
+    }
   
   return (
     <div className="min-h-screen bg-white text-neutral-900 dark:bg-black dark:text-neutral-100">
@@ -204,8 +224,8 @@ export default async function BlogPage({ params }: BlogPageProps) {
                     ),
                     img: ({ src, alt }) => (
                       <ImageComponent
-                        src={src || ''}
-                        alt={alt || ''}
+                        src={typeof src === 'string' ? src : ''}
+                        alt={typeof alt === 'string' ? alt : ''}
                         priority={false}
                       />
                     ),
@@ -290,9 +310,15 @@ export default async function BlogPage({ params }: BlogPageProps) {
       </main>
     </div>
   )
+  } catch (error) {
+    console.error('页面加载错误:', error)
+    
+    // 返回优雅的错误页面
+    return <ErrorPage />
+  }
 }
 
 // ISR 配置
 export const revalidate = 60 // ISR revalidate time in seconds
-export const dynamic = 'force-static'
-export const dynamicParams = true
+export const dynamic = 'force-dynamic' // 强制动态渲染以确保错误恢复
+export const dynamicParams = true // 允许动态参数

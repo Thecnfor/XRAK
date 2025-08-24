@@ -14,9 +14,24 @@ let cacheTimestamp: number = 0
  * 检查分类数据缓存是否有效
  */
 function isClassifiedCacheValid(): boolean {
-  if (!cachedClassifiedData || !cacheTimestamp) return false
+  if (!cachedClassifiedData || !cacheTimestamp) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[ContentClassifier] Cache invalid: no data or timestamp')
+    }
+    return false
+  }
   const cacheAge = (Date.now() - cacheTimestamp) / 1000
-  return cacheAge < ISR_CONFIG.BLOG_DATA.revalidate
+  const isValid = cacheAge < ISR_CONFIG.BLOG_DATA.revalidate
+  
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[ContentClassifier] Cache check:', {
+      cacheAge: Math.round(cacheAge),
+      revalidateTime: ISR_CONFIG.BLOG_DATA.revalidate,
+      isValid
+    })
+  }
+  
+  return isValid
 }
 
 /**
@@ -119,7 +134,14 @@ export async function generateProjectCardData(): Promise<ContentCardData[]> {
 export async function getAllClassifiedCardData() {
   // 检查缓存是否有效
   if (isClassifiedCacheValid()) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[ContentClassifier] Using cached data')
+    }
     return cachedClassifiedData!
+  }
+  
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[ContentClassifier] Generating new classified data...')
   }
   
   try {
@@ -140,17 +162,27 @@ export async function getAllClassifiedCardData() {
     cachedClassifiedData = result
     cacheTimestamp = Date.now()
     
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[ContentClassifier] Cache updated:', {
+        recommendCount: recommendCardData.length,
+        newsCount: newsCardData.length,
+        projectCount: projectCardData.length,
+        timestamp: new Date().toISOString()
+      })
+    }
+    
     return result
   } catch (error) {
-    console.error('Failed to generate classified card data:', error)
+    console.error('[ContentClassifier] Failed to generate classified card data:', error)
     
     // 如果有缓存数据，返回缓存（即使过期）
     if (cachedClassifiedData) {
-      console.warn('Using stale classified data due to generation error')
+      console.warn('[ContentClassifier] Using stale classified data due to generation error')
       return cachedClassifiedData
     }
     
     // 返回空数据作为降级
+    console.warn('[ContentClassifier] Returning empty data as fallback')
     return {
       recommendCardData: [],
       newsCardData: [],

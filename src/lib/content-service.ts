@@ -69,38 +69,38 @@ export interface DetailedCategory {
  */
 const API_ROUTES = {
   // 基础 API 地址（统一指向博客API服务）
-  BASE_URL: 'http://192.168.1.137:8000/api',
+  BASE_URL: 'http://localhost:8000/api',
   
   // 博客数据路由
   BLOG_DATA: {
-    // 获取所有博客数据: GET http://192.168.1.137:8000/api/blog-data
-    GET_ALL: 'http://192.168.1.137:8000/api/blog-data',
-    // 刷新缓存: POST http://192.168.1.137:8000/api/blog-data/refresh
-    REFRESH: 'http://192.168.1.137:8000/api/blog-data/refresh'
+    // 获取所有博客数据: GET http://localhost:8000/api/blog-data
+    GET_ALL: 'http://localhost:8000/api/blog-data',
+    // 刷新缓存: POST http://localhost:8000/api/blog-data/refresh
+    REFRESH: 'http://localhost:8000/api/blog-data/refresh'
   },
   
   // 文章路由
   ARTICLES: {
-    // 获取文章详情: GET http://192.168.1.137:8000/api/articles/{categoryKey}/{articleId}
-    GET_ARTICLE: (categoryKey: string, articleId: string) => `http://192.168.1.137:8000/api/articles/${categoryKey}/${articleId}`,
-    // 获取文章列表: GET http://192.168.1.137:8000/api/articles/{categoryKey}
-    GET_ARTICLES: (categoryKey: string) => `http://192.168.1.137:8000/api/articles/${categoryKey}`
+    // 获取文章详情: GET http://localhost:8000/api/articles/{categoryKey}/{articleId}
+    GET_ARTICLE: (categoryKey: string, articleId: string) => `http://localhost:8000/api/articles/${categoryKey}/${articleId}`,
+    // 获取文章列表: GET http://localhost:8000/api/articles/{categoryKey}
+    GET_ARTICLES: (categoryKey: string) => `http://localhost:8000/api/articles/${categoryKey}`
   },
   
   // 分类路由
   CATEGORIES: {
-    // 获取所有分类: GET http://192.168.1.137:8000/api/categories
-    GET_ALL: 'http://192.168.1.137:8000/api/categories',
-    // 获取分类详情: GET http://192.168.1.137:8000/api/categories/{categoryKey}
-    GET_CATEGORY: (categoryKey: string) => `http://192.168.1.137:8000/api/categories/${categoryKey}`
+    // 获取所有分类: GET http://localhost:8000/api/categories
+    GET_ALL: 'http://localhost:8000/api/categories',
+    // 获取分类详情: GET http://localhost:8000/api/categories/{categoryKey}
+    GET_CATEGORY: (categoryKey: string) => `http://localhost:8000/api/categories/${categoryKey}`
   },
   
   // 内容管理路由（后台使用）
   CONTENT: {
-    // 预热缓存: POST http://192.168.1.137:8000/api/content/preload
-    PRELOAD: 'http://192.168.1.137:8000/api/content/preload',
-    // 清除缓存: DELETE http://192.168.1.137:8000/api/content/cache
-    CLEAR_CACHE: 'http://192.168.1.137:8000/api/content/cache'
+    // 预热缓存: POST http://localhost:8000/api/content/preload
+    PRELOAD: 'http://localhost:8000/api/content/preload',
+    // 清除缓存: DELETE http://localhost:8000/api/content/cache
+    CLEAR_CACHE: 'http://localhost:8000/api/content/cache'
   }
 } as const
 
@@ -118,11 +118,13 @@ export async function getArticleContent(
       headers: {
         'Content-Type': 'application/json',
       },
-      cache: 'default'
+      cache: 'no-store', // 禁用缓存以确保错误恢复
+      next: { revalidate: 0 } // 每次都重新验证
     })
     
     if (response.ok) {
-      const articleData = await response.json()
+      const responseData = await response.json()
+      const articleData = responseData.data // 提取data字段
       // 转换为 DetailedArticle 格式
       return {
         title: articleData.title,
@@ -175,38 +177,50 @@ export async function getCategoryContent(categoryKey: string): Promise<{
       headers: {
         'Content-Type': 'application/json',
       },
-      cache: 'default'
+      cache: 'no-store', // 禁用缓存以确保错误恢复
+      next: { revalidate: 0 } // 每次都重新验证
     })
     
     if (response.ok) {
-      const categoryData = await response.json()
+      const responseData = await response.json()
+      const categoryData = responseData.data // 提取data字段
       
       // 转换文章数据为 DetailedArticle 格式
-       const articles: DetailedArticle[] = categoryData.articles.map((article: {
-         title: string;
-         category: string;
-         publishDate: string;
-         content: string;
-         excerpt?: string;
-         imagePath?: string;
-         tags?: string[];
-         readTime?: string;
-         author?: string;
-       }) => ({
-         title: article.title,
-         category: article.category,
-         publishDate: article.publishDate,
-         content: article.content,
-         excerpt: article.excerpt || article.content?.slice(0, 200) || '',
-         imagePath: article.imagePath,
-         tags: article.tags || [],
-         readTime: article.readTime || '5分钟',
-         author: article.author || '未知作者',
-         source: '统一博客API服务'
-       }))
+      // articles是一个对象，需要转换为数组
+      const articles: DetailedArticle[] = Object.values(categoryData.articles || {}).map((article) => {
+         const typedArticle = article as {
+           id?: string;
+           title: string;
+           category?: string;
+           publishDate: string;
+           content: string;
+           excerpt?: string;
+           imagePath?: string;
+           tags?: string[];
+           readTime?: string;
+           author?: string;
+         }
+         return {
+           title: typedArticle.title,
+           category: typedArticle.category || categoryKey,
+           publishDate: typedArticle.publishDate,
+           content: typedArticle.content,
+           excerpt: typedArticle.excerpt || typedArticle.content?.slice(0, 200) || '',
+           imagePath: typedArticle.imagePath,
+           tags: typedArticle.tags || [],
+           readTime: typedArticle.readTime || '5分钟',
+           author: typedArticle.author || '未知作者',
+           source: '统一博客API服务'
+         }
+       })
       
       return {
-        categoryInfo: categoryData.categoryInfo,
+        categoryInfo: {
+          name: categoryData.title,
+          href: categoryData.href,
+          description: categoryData.description || '',
+          defaultArticle: categoryData.defaultArticle
+        },
         articles
       }
     } else {
