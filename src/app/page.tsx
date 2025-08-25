@@ -4,7 +4,6 @@ import { TextAnimate } from "@/components/magicui/text-animate";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { ContentCard } from "@/components/layout/content-card";
 import { generateRecommendCardData, generateNewsCardData } from "@/lib/content-classifier";
-import { ISR_CONFIG } from "@/config/isr-config";
 
 // ISR配置导出 - Next.js要求直接导出数值
 export const revalidate = 60; // ISR_CONFIG.BLOG_DATA.revalidate
@@ -84,7 +83,7 @@ export default async function Home() {
 
 const Hero = () => {
   return(
-    <div className="group relative md:aspect-[16/9] aspect-[3/4] rounded-lg @lg:col-span-3 @lg:sticky top-0 @lg:mb-0 @md:mb-20 mb-5 mt-10 cursor-pointer">
+    <div className="group relative md:aspect-[16/9] aspect-[3/4] rounded-lg @lg:col-span-3 @lg:sticky top-10 @lg:mb-0 @md:mb-20 mb-5 mt-10 cursor-pointer">
       <div className="relative h-full w-full rounded-2xl grid grid-rows-[auto_1fr_auto] overflow-hidden">
         <div className="absolute w-full h-full transformCard">
           <AuroraBackground className="group-hover:scale-110 transition-all duration-300">

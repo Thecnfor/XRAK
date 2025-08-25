@@ -54,8 +54,27 @@ export default function Header() {
         justify-end
         gap-3
         backdrop-filter
-        backdrop-blur-md
-        bg-[rgba(255,255,255,0.01)]
+        backdrop-blur-lg
+        bg-[rgba(255,255,255,0.6)]
+        dark:bg-[rgba(0,0,0,0.6)]
+        before:absolute
+        before:inset-0
+        before:bg-gradient-to-b
+        before:from-transparent
+        before:via-transparent
+        before:to-[rgba(255,255,255,0.1)]
+        dark:before:to-[rgba(0,0,0,0.1)]
+        before:pointer-events-none
+        after:absolute
+        after:inset-x-0
+        after:bottom-0
+        after:h-px
+        after:bg-gradient-to-r
+        after:from-transparent
+        after:via-[rgba(255,255,255,0.2)]
+        after:to-transparent
+        dark:after:via-[rgba(255,255,255,0.1)]
+        after:pointer-events-none
         ">
           <Search isSearchOpen={isSearchOpen} setIsSearchOpen={setIsSearchOpen} />
           <SearchContent isSearchOpen={isSearchOpen} />

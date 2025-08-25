@@ -18,10 +18,30 @@ export default function ErrorPage({
   autoRetry = true,
   retryInterval = 10000 // 10秒
 }: ErrorPageProps) {
-  const [retryCount, setRetryCount] = useState(0)
+  const [retryCount, setRetryCount] = useState(() => {
+    // 从localStorage读取重试次数，如果不存在则返回0
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('errorPageRetryCount')
+        if (stored) {
+          const count = parseInt(stored, 10)
+          return isNaN(count) ? 0 : count
+        }
+      } catch (error) {
+        console.warn('读取重试次数失败:', error)
+      }
+    }
+    return 0
+  })
   const [isRetrying, setIsRetrying] = useState(false)
   
   const handleReload = () => {
+    // 手动重新加载时清除重试计数
+    try {
+      localStorage.removeItem('errorPageRetryCount')
+    } catch (error) {
+      console.warn('清除重试次数失败:', error)
+    }
     window.location.reload()
   }
   
@@ -38,7 +58,12 @@ export default function ErrorPage({
         })
         
         if (response.ok) {
-          // 服务器恢复，重新加载页面
+          // 服务器恢复，清除重试计数并重新加载页面
+          try {
+            localStorage.removeItem('errorPageRetryCount')
+          } catch (error) {
+            console.warn('清除重试次数失败:', error)
+          }
           window.location.reload()
         }
       } catch (error) {
@@ -46,14 +71,23 @@ export default function ErrorPage({
         console.log('服务器仍不可用，将在', retryInterval / 1000, '秒后重试')
       } finally {
         setIsRetrying(false)
-        setRetryCount(prev => prev + 1)
+        setRetryCount(prev => {
+          const newCount = prev + 1
+          // 将新的重试次数保存到localStorage
+          try {
+            localStorage.setItem('errorPageRetryCount', newCount.toString())
+          } catch (error) {
+            console.warn('保存重试次数失败:', error)
+          }
+          return newCount
+        })
       }
     }
     
     const timer = setInterval(checkServerStatus, retryInterval)
     
     return () => clearInterval(timer)
-  }, [autoRetry, retryInterval, retryCount])
+  }, [autoRetry, retryInterval])
 
   return (
     <div className="max-h-screen h-full bg-white text-neutral-900 dark:bg-black dark:text-neutral-100 flex items-center justify-center">
@@ -103,9 +137,9 @@ export default function ErrorPage({
             <button 
               onClick={handleReload}
               disabled={isRetrying}
-              className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-neutral-900 dark:bg-neutral-100 dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 disabled:bg-neutral-400 disabled:dark:bg-neutral-600 disabled:cursor-not-allowed transition-colors rounded-lg"
+              className="inline-flex cursor-pointer items-center justify-center px-4 py-2 text-sm font-medium border border-neutral-300 dark:border-neutral-600 text-white bg-neutral-900 dark:bg-neutral-100 dark:text-neutral-900 hover:bg-neutral-100 hover:text-neutral-900 dark:hover:bg-neutral-900 dark:hover:text-neutral-100 disabled:bg-neutral-400 disabled:dark:bg-neutral-600 disabled:cursor-not-allowed disabled:hover:text-white dark:disabled:hover:text-black transition-colors duration-500  rounded-lg"
             >
-              {isRetrying ? '检测中...' : '手动重新加载'}
+              {isRetrying ? '检测中...' : '重新加载'}
             </button>
           )}
           <Link 

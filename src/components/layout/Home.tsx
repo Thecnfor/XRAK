@@ -518,7 +518,7 @@ const Content = ({ children }: { children: React.ReactNode }) => {
            style={{
              transform: isMobileNavVisible ? 'translateX(calc(var(--document-width) + 1rem - 100dvw))' : 'translateX(0)'
            }}>
-        <main className="w-[100dvw] md:w-full h-[calc(var(--document-height)-var(--header-height))] mt-[var(--header-height)] overflow-y-auto relative @container outline-none overflow-hidden">
+        <main className="w-[100dvw] md:w-full h-[calc(var(--document-height)-var(--header-height))] pt-[var(--header-height)] overflow-y-auto relative @container outline-none overflow-hidden">
           <span className="sr-only" aria-live="polite" aria-atomic="true">XRAK</span>
           {children}
         </main>
