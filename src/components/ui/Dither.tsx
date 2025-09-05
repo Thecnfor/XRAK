@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useRef, useEffect, forwardRef } from "react";
 import { Canvas, useFrame, useThree, ThreeEvent } from "@react-three/fiber";
@@ -324,7 +324,7 @@ export default function Dither({
     <Canvas
       className="w-full h-full relative"
       camera={{ position: [0, 0, 6] }}
-      dpr={typeof window !== 'undefined' ? window.devicePixelRatio : 1}
+      dpr={typeof window !== "undefined" ? window.devicePixelRatio : 1}
       gl={{ antialias: true, preserveDrawingBuffer: true }}
     >
       <DitheredWaves
