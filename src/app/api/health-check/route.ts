@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
 /**
  * 健康检查API端点
@@ -47,7 +47,8 @@ export async function HEAD() {
     } else {
       return new NextResponse(null, { status: 503 })
     }
-  } catch (error) {
+  } catch {
+    // 忽略错误，但返回503状态码
     return new NextResponse(null, { status: 503 })
   }
 }

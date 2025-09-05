@@ -28,15 +28,15 @@ export const TitleComponent: React.FC<TitleComponentProps> = ({ text, level, id 
     }
   }
 
-  const HeadingTag = `h${Math.min(Math.max(level, 1), 6)}` as keyof JSX.IntrinsicElements
+  const headingTag = `h${Math.min(Math.max(level, 1), 6)}` as keyof JSX.IntrinsicElements
 
-  return (
-    <HeadingTag 
-      id={id}
-      className={getHeadingClass(level)}
-    >
-      {text}
-    </HeadingTag>
+  return React.createElement(
+    headingTag,
+    {
+      id,
+      className: getHeadingClass(level)
+    },
+    text
   )
 }
 

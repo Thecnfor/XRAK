@@ -1,8 +1,7 @@
 import { Footer } from "@/components/layout/footer";
 import { Login } from "@/components/layout/Header";
-import { TextAnimate } from "@/components/magicui/text-animate";
-import { AuroraBackground } from "@/components/ui/aurora-background";
 import { ContentCard } from "@/components/layout/content-card";
+import { Hero } from "@/components/layout/Hero";
 import { generateRecommendCardData, generateNewsCardData } from "@/lib/content-classifier";
 
 // ISR配置导出 - Next.js要求直接导出数值
@@ -79,29 +78,3 @@ export default async function Home() {
     </>
   );
 }
-
-
-const Hero = () => {
-  return(
-    <div className="group relative md:aspect-[16/9] aspect-[3/4] rounded-lg @lg:col-span-3 @lg:sticky top-10 @lg:mb-0 @md:mb-20 mb-5 mt-10 cursor-pointer">
-      <div className="relative h-full w-full rounded-2xl grid grid-rows-[auto_1fr_auto] overflow-hidden">
-        <div className="absolute w-full h-full transformCard">
-          <AuroraBackground className="group-hover:scale-110 transition-all duration-300">
-            <span className="@md:text-[5rem] text-5xl font-thin text-[var(--color-text)] whitespace-nowrap flex-nowrap">
-              <TextAnimate animation="blurInUp" by="character" once>
-                NEXT网站重构
-              </TextAnimate>
-            </span>
-          </AuroraBackground>
-        </div>
-      </div>
-      <div className="mt-6">
-        <h1 className="@md:text-5xl text-4xl font-bold ">
-            2025年暑期更新
-        </h1>
-        <div className="text-sm font-bold @md:mt-3 mt-2">
-            生产最积极，诞生项目最多的暑假。
-        </div>
-      </div>
-    </div>
-)}

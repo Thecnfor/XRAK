@@ -115,8 +115,9 @@ export function useNavigationData(): UseNavigationDataReturn {
     if (isRefreshing) return
     
     setIsRefreshing(true)
+    
     try {
-      const response = await fetch('/api/revalidate?path=/api/navigation', {
+      const response = await fetch('/api/navigation-refresh', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -138,11 +139,11 @@ export function useNavigationData(): UseNavigationDataReturn {
     } finally {
       setIsRefreshing(false)
     }
-  }, [isRefreshing, loadNavigationData])
+  }, [isRefreshing, loadNavigationData]) // 只包含实际使用的变量
 
   const refetch = useCallback(async () => {
     await loadNavigationData(true)
-  }, [loadNavigationData])
+  }, [loadNavigationData]) // 只包含实际使用的变量
 
   useEffect(() => {
     loadNavigationData()

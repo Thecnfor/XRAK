@@ -3,6 +3,7 @@ import { Noto_Sans_SC, Noto_Serif_SC } from "next/font/google";
 import { GeistSans } from "geist/font/sans";
 import { ReduxProvider } from "@/components/providers/redux-provider";
 import { DocumentWidthProvider } from "@/components/providers/DocumentWidthProvider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import LoadingScreen from "@/components/layout/LoadingScreen";
 import "./globals.css";
 import Header from "@/components/layout/Header";
@@ -84,14 +85,16 @@ export default function RootLayout({
         className={`${notoSansSC.variable} ${notoSerifSC.variable} font-sans antialiased`}
       >
         <DocumentWidthProvider>
-          <ReduxProvider>
-            <LoadingScreen>
-              <Header />
-              <Home>
-                {children}
-              </Home>
-            </LoadingScreen>
-          </ReduxProvider>
+          <ThemeProvider>
+            <ReduxProvider>
+              <LoadingScreen>
+                <Header />
+                <Home>
+                  {children}
+                </Home>
+              </LoadingScreen>
+            </ReduxProvider>
+          </ThemeProvider>
         </DocumentWidthProvider>
       </body>
     </html>

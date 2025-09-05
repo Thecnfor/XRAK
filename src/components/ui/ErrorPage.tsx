@@ -66,7 +66,7 @@ export default function ErrorPage({
           }
           window.location.reload()
         }
-      } catch (error) {
+      } catch {
         // 服务器仍然不可用，继续等待
         console.log('服务器仍不可用，将在', retryInterval / 1000, '秒后重试')
       } finally {

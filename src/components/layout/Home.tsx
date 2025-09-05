@@ -54,18 +54,16 @@ export default function Home({ children }: { children: React.ReactNode }) {
     : 'md:transition-[grid-template-columns] md:duration-500 md:ease-curve-sidebar'
   
   return (
-    <div key={layoutKey} className={`
-        grid
-        ${shouldTransition}
-        ${mobileClasses}
-        ${desktopClasses}
-    `}>
+    <div className="h-full w-full relative">
+      <div
+        key={layoutKey}
+        className={`grid ${shouldTransition} ${mobileClasses} ${desktopClasses}`}
+      >
         <Nav />
-        <Content>
-            {children}
-        </Content>
+        <Content>{children}</Content>
+      </div>
     </div>
-  )
+  );
 }
 
 // 返回按钮组件
