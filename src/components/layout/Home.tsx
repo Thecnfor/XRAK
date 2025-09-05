@@ -512,11 +512,11 @@ const Content = ({ children }: { children: React.ReactNode }) => {
   
   return (
     <div className="relative h-screen overflow-x-hidden">
-      <div className="w-full transition-transform duration-800 ease-curve-sidebar md:transition-none md:transform-none"
+      <div className="w-full h-full transition-transform duration-800 ease-curve-sidebar md:transition-none md:transform-none"
            style={{
              transform: isMobileNavVisible ? 'translateX(calc(var(--document-width) + 1rem - 100dvw))' : 'translateX(0)'
            }}>
-        <main className="w-[100dvw] md:w-full h-[calc(var(--document-height)-var(--header-height))] pt-[var(--header-height)] overflow-y-auto relative @container outline-none overflow-hidden">
+        <main className="w-[100dvw] h-full md:w-full h-[calc(var(--document-height)-var(--header-height))] pt-[var(--header-height)] overflow-y-auto relative @container outline-none overflow-hidden">
           <span className="sr-only" aria-live="polite" aria-atomic="true">XRAK</span>
           {children}
         </main>
