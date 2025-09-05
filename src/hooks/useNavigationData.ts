@@ -108,7 +108,7 @@ export function useNavigationData(): UseNavigationDataReturn {
       setIsLoading(false)
       setIsInitialLoad(false)
     }
-  }, [isInitialLoad])
+  }, [hasError, isInitialLoad, navigationData.length])
 
   // ISR缓存刷新函数
   const refreshCache = useCallback(async () => {
