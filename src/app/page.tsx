@@ -2,26 +2,29 @@ import { Footer } from "@/components/layout/footer";
 import { Login } from "@/components/layout/Header";
 import { ContentCard } from "@/components/layout/content-card";
 import { Hero } from "@/components/layout/Hero";
-import { generateRecommendCardData, generateNewsCardData } from "@/lib/content-classifier";
+import {
+  generateRecommendCardData,
+  generateNewsCardData,
+} from "@/lib/content-classifier";
 
 // ISR配置导出 - Next.js要求直接导出数值
 export const revalidate = 60; // ISR_CONFIG.BLOG_DATA.revalidate
-export const dynamic = 'force-static';
+export const dynamic = "force-static";
 export const dynamicParams = true;
 
 export default async function Home() {
   // 异步获取卡片数据
   const [recommendCardData, newsCardData] = await Promise.all([
     generateRecommendCardData(),
-    generateNewsCardData()
+    generateNewsCardData(),
   ]);
 
   // 开发环境下添加调试信息
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Homepage] Data fetched:', {
+  if (process.env.NODE_ENV === "development") {
+    console.log("[Homepage] Data fetched:", {
       recommendCount: recommendCardData.length,
       newsCount: newsCardData.length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -33,9 +36,9 @@ export default async function Home() {
             <Hero />
             <div className="mb-7 @lg:grid-cols-1 gap-y-4 gap-x-6 cols-pan-1 grid grid-cols-1 @md:grid-cols-3">
               {recommendCardData.map((data, index) => (
-                <ContentCard 
+                <ContentCard
                   key={`recommend-${index}`}
-                  variant="recommend" 
+                  variant="recommend"
                   data={data}
                 />
               ))}
@@ -44,15 +47,13 @@ export default async function Home() {
           <div className="pt-10 @lg:pt-50 @md:pt-30 px-6 w-full @lg:max-w-[90rem]">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold">最新消息</h2>
-              <button className="text-md text-bold text-[var(--color-text)] hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors ease-curve-sidebar duration-300 p-1 rounded-2xl cursor-pointer">查看更多</button>
+              <button className="text-md text-bold text-[var(--color-text)] hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors ease-curve-sidebar duration-300 p-1 rounded-2xl cursor-pointer">
+                查看更多
+              </button>
             </div>
             <div className="pt-10 grid grid-rows-[repeat(6,120px)] md:grid-rows-[repeat(6,185px)] @lg:grid-rows-[repeat(3,185px)] grid-cols-1 @lg:grid-cols-2 gap-6 w-full">
               {newsCardData.map((data, index) => (
-                <ContentCard 
-                  key={`news-${index}`}
-                  variant="news" 
-                  data={data}
-                />
+                <ContentCard key={`news-${index}`} variant="news" data={data} />
               ))}
             </div>
           </div>

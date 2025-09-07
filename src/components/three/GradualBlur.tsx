@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import React, {
   CSSProperties,
@@ -126,7 +126,10 @@ const getGradientDirection = (position: string): string => {
   return directions[position] || "to bottom";
 };
 
-const debounce = <T extends (...args: unknown[]) => void>(fn: T, wait: number) => {
+const debounce = <T extends (...args: unknown[]) => void>(
+  fn: T,
+  wait: number
+) => {
   let t: ReturnType<typeof setTimeout>;
   return (...args: Parameters<T>) => {
     clearTimeout(t);
@@ -138,7 +141,9 @@ const useResponsiveDimension = (
   config: Partial<GradualBlurProps>,
   key: keyof GradualBlurProps
 ) => {
-  const [val, setVal] = useState<GradualBlurProps[keyof GradualBlurProps]>(config[key]);
+  const [val, setVal] = useState<GradualBlurProps[keyof GradualBlurProps]>(
+    config[key]
+  );
   useEffect(() => {
     if (!responsive) return;
     const calc = () => {
@@ -147,11 +152,17 @@ const useResponsiveDimension = (
       const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
       const k = cap(key as string);
       if (w <= 480 && (config as Record<string, unknown>)["mobile" + k])
-        v = (config as Record<string, unknown>)["mobile" + k] as GradualBlurProps[keyof GradualBlurProps];
+        v = (config as Record<string, unknown>)[
+          "mobile" + k
+        ] as GradualBlurProps[keyof GradualBlurProps];
       else if (w <= 768 && (config as Record<string, unknown>)["tablet" + k])
-        v = (config as Record<string, unknown>)["tablet" + k] as GradualBlurProps[keyof GradualBlurProps];
+        v = (config as Record<string, unknown>)[
+          "tablet" + k
+        ] as GradualBlurProps[keyof GradualBlurProps];
       else if (w <= 1024 && (config as Record<string, unknown>)["desktop" + k])
-        v = (config as Record<string, unknown>)["desktop" + k] as GradualBlurProps[keyof GradualBlurProps];
+        v = (config as Record<string, unknown>)[
+          "desktop" + k
+        ] as GradualBlurProps[keyof GradualBlurProps];
       setVal(v);
     };
     const deb = debounce(calc, 100);
@@ -288,7 +299,10 @@ const GradualBlur: React.FC<GradualBlurProps> = (props) => {
       baseStyle.left = 0;
       baseStyle.right = 0;
     } else if (isHorizontal) {
-      baseStyle.width = (responsiveWidth || responsiveHeight) as string | number | undefined;
+      baseStyle.width = (responsiveWidth || responsiveHeight) as
+        | string
+        | number
+        | undefined;
       baseStyle.height = "100%";
       baseStyle[config.position] = 0;
       baseStyle.top = 0;
@@ -298,7 +312,8 @@ const GradualBlur: React.FC<GradualBlurProps> = (props) => {
     return baseStyle;
   }, [config, responsiveHeight, responsiveWidth, isVisible]);
 
-  const { hoverIntensity, animated, onAnimationComplete, duration } = config as Record<string, unknown>;
+  const { hoverIntensity, animated, onAnimationComplete, duration } =
+    config as Record<string, unknown>;
   useEffect(() => {
     if (isVisible && animated === "scroll" && onAnimationComplete) {
       const t = setTimeout(
@@ -328,7 +343,8 @@ const GradualBlur: React.FC<GradualBlurProps> = (props) => {
 const GradualBlurMemo = React.memo(GradualBlur);
 GradualBlurMemo.displayName = "GradualBlur";
 (GradualBlurMemo as unknown as Record<string, unknown>).PRESETS = PRESETS;
-(GradualBlurMemo as unknown as Record<string, unknown>).CURVE_FUNCTIONS = CURVE_FUNCTIONS;
+(GradualBlurMemo as unknown as Record<string, unknown>).CURVE_FUNCTIONS =
+  CURVE_FUNCTIONS;
 export default GradualBlurMemo;
 
 const injectStyles = () => {

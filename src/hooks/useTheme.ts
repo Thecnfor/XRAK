@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useThemeContext } from '@/components/providers/ThemeProvider';
+import { useThemeContext } from "@/components/providers/ThemeProvider";
 
 /**
  * 自定义Hook，用于获取当前的主题状态

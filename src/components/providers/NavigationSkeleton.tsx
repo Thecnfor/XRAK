@@ -1,27 +1,27 @@
-'use client'
+"use client";
 
-import React from 'react'
+import React from "react";
 
 interface NavigationSkeletonProps {
   /** 骨架屏项目数量 */
-  itemCount?: number
+  itemCount?: number;
   /** 是否为移动端样式 */
-  isMobile?: boolean
+  isMobile?: boolean;
   /** 自定义类名 */
-  className?: string
+  className?: string;
 }
 
 /**
  * 导航骨架屏组件
  * 提供优雅的加载状态显示
  */
-export function NavigationSkeleton({ 
-  itemCount = 5, 
-  isMobile = false, 
-  className = '' 
+export function NavigationSkeleton({
+  itemCount = 5,
+  isMobile = false,
+  className = "",
 }: NavigationSkeletonProps) {
-  const items = Array.from({ length: itemCount }, (_, i) => i)
-  
+  const items = Array.from({ length: itemCount }, (_, i) => i);
+
   if (isMobile) {
     return (
       <div className={`animate-pulse space-y-4 ${className}`}>
@@ -32,9 +32,9 @@ export function NavigationSkeleton({
           </div>
         ))}
       </div>
-    )
+    );
   }
-  
+
   return (
     <div className={`animate-pulse space-y-3 ${className}`}>
       {items.map((i) => (
@@ -44,7 +44,7 @@ export function NavigationSkeleton({
         </div>
       ))}
     </div>
-  )
+  );
 }
 
 /**
@@ -52,26 +52,26 @@ export function NavigationSkeleton({
  */
 interface NavigationErrorProps {
   /** 错误信息 */
-  message?: string
+  message?: string;
   /** 重试回调 */
-  onRetry?: () => void
+  onRetry?: () => void;
   /** 是否显示刷新页面按钮 */
-  showRefresh?: boolean
+  showRefresh?: boolean;
   /** 是否为移动端样式 */
-  isMobile?: boolean
+  isMobile?: boolean;
   /** 自定义类名 */
-  className?: string
+  className?: string;
 }
 
-export function NavigationError({ 
-  message = '导航加载失败',
+export function NavigationError({
+  message = "导航加载失败",
   onRetry,
   showRefresh = true,
   isMobile = false,
-  className = ''
+  className = "",
 }: NavigationErrorProps) {
-  const containerClass = isMobile ? 'p-4' : ''
-  
+  const containerClass = isMobile ? "p-4" : "";
+
   return (
     <div className={`${containerClass} ${className}`}>
       <div className="text-red-500 dark:text-red-400 text-sm p-3 md:p-4 rounded-lg bg-red-50 dark:bg-red-900/20">
@@ -79,16 +79,16 @@ export function NavigationError({
         <p className="text-xs opacity-75 mb-2 md:mb-3">请检查网络连接或重试</p>
         <div className="flex gap-2">
           {onRetry && (
-            <button 
-              onClick={onRetry} 
+            <button
+              onClick={onRetry}
               className="text-xs bg-red-100 dark:bg-red-800 px-2 py-1 rounded hover:bg-red-200 dark:hover:bg-red-700 transition-colors"
             >
               重新加载
             </button>
           )}
           {showRefresh && (
-            <button 
-              onClick={() => window.location.reload()} 
+            <button
+              onClick={() => window.location.reload()}
               className="text-xs bg-neutral-100 dark:bg-neutral-800 px-2 py-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors text-neutral-600 dark:text-neutral-400"
             >
               刷新页面
@@ -97,7 +97,7 @@ export function NavigationError({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 /**
@@ -106,43 +106,39 @@ export function NavigationError({
 interface CacheStatusIndicatorProps {
   /** 缓存状态 */
   cacheStatus: {
-    hasCachedData: boolean
-    isValid: boolean
-    canUseStale: boolean
-    cacheAge: number
-  }
+    hasCachedData: boolean;
+    isValid: boolean;
+    canUseStale: boolean;
+    cacheAge: number;
+  };
   /** 是否显示详细信息 */
-  showDetails?: boolean
+  showDetails?: boolean;
 }
 
-export function CacheStatusIndicator({ 
-  cacheStatus, 
-  showDetails = false 
+export function CacheStatusIndicator({
+  cacheStatus,
+  showDetails = false,
 }: CacheStatusIndicatorProps) {
   if (!showDetails || !cacheStatus.hasCachedData) {
-    return null
+    return null;
   }
-  
+
   const getStatusColor = () => {
-    if (cacheStatus.isValid) return 'text-green-500'
-    if (cacheStatus.canUseStale) return 'text-yellow-500'
-    return 'text-red-500'
-  }
-  
+    if (cacheStatus.isValid) return "text-green-500";
+    if (cacheStatus.canUseStale) return "text-yellow-500";
+    return "text-red-500";
+  };
+
   const getStatusText = () => {
-    if (cacheStatus.isValid) return '缓存有效'
-    if (cacheStatus.canUseStale) return '使用过期缓存'
-    return '缓存已失效'
-  }
-  
+    if (cacheStatus.isValid) return "缓存有效";
+    if (cacheStatus.canUseStale) return "使用过期缓存";
+    return "缓存已失效";
+  };
+
   return (
     <div className="text-xs opacity-50 mt-2">
-      <span className={getStatusColor()}>
-        {getStatusText()}
-      </span>
-      <span className="ml-2">
-        ({Math.round(cacheStatus.cacheAge)}s)
-      </span>
+      <span className={getStatusColor()}>{getStatusText()}</span>
+      <span className="ml-2">({Math.round(cacheStatus.cacheAge)}s)</span>
     </div>
-  )
+  );
 }

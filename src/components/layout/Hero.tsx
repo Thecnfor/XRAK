@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { TextAnimate } from "@/components/magicui/text-animate";
 import PixelBlast from "@/components/ui/PixelBlast";
@@ -11,14 +11,12 @@ import { useTheme } from "@/hooks/useTheme";
  */
 export const Hero = () => {
   const isDarkMode = useTheme();
-  
+
   return (
     <div className="group relative md:aspect-[16/9] aspect-[3/4] rounded-lg @lg:col-span-3 @lg:sticky top-10 @lg:mb-0 @md:mb-20 mb-5 mt-0 @lg:mt-10 cursor-pointer">
       <div className="relative h-full w-full rounded-2xl grid grid-rows-[auto_1fr_auto] overflow-hidden">
         <div className="absolute w-full h-full transformCard">
-          <div
-            style={{ width: "100%", height: "100%", position: "relative" }}
-          >
+          <div style={{ width: "100%", height: "100%", position: "relative" }}>
             {isDarkMode ? (
               <PixelBlast
                 variant="circle"

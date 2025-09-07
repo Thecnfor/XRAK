@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import React, { useEffect, useRef } from "react";
 import * as THREE from "three";
@@ -412,7 +412,10 @@ const PixelBlast: React.FC<PixelBlastProps> = ({
     if (!threeRef.current) mustReinit = true;
     else if (prevConfigRef.current) {
       for (const k of needsReinitKeys)
-        if (prevConfigRef.current[k as keyof typeof prevConfigRef.current] !== (cfg as Record<string, unknown>)[k]) {
+        if (
+          prevConfigRef.current[k as keyof typeof prevConfigRef.current] !==
+          (cfg as Record<string, unknown>)[k]
+        ) {
           mustReinit = true;
           break;
         }
@@ -546,7 +549,10 @@ const PixelBlast: React.FC<PixelBlastProps> = ({
         const noisePass = new EffectPass(camera, noiseEffect);
         noisePass.renderToScreen = true;
         if (composer && composer.passes.length > 0)
-          composer.passes.forEach((p) => ((p as unknown as Record<string, unknown>).renderToScreen = false));
+          composer.passes.forEach(
+            (p) =>
+              ((p as unknown as Record<string, unknown>).renderToScreen = false)
+          );
         composer.addPass(noisePass);
       }
       if (composer)
@@ -591,7 +597,11 @@ const PixelBlast: React.FC<PixelBlastProps> = ({
         uniforms.uTime.value =
           timeOffset + clock.getElapsedTime() * speedRef.current;
         if (liquidEffect) {
-          const timeUniform = (liquidEffect as unknown as { uniforms: Map<string, THREE.Uniform<number>> }).uniforms.get("uTime");
+          const timeUniform = (
+            liquidEffect as unknown as {
+              uniforms: Map<string, THREE.Uniform<number>>;
+            }
+          ).uniforms.get("uTime");
           if (timeUniform) {
             timeUniform.value = uniforms.uTime.value;
           }
@@ -602,7 +612,11 @@ const PixelBlast: React.FC<PixelBlastProps> = ({
             const effs = (p as unknown as Record<string, unknown>).effects;
             if (effs)
               (effs as unknown[]).forEach((eff: unknown) => {
-                const u = ((eff as unknown as { uniforms?: Map<string, { value: number }> }).uniforms?.get("uTime"));
+                const u = (
+                  eff as unknown as {
+                    uniforms?: Map<string, { value: number }>;
+                  }
+                ).uniforms?.get("uTime");
                 if (u) u.value = uniforms.uTime.value;
               });
           });
@@ -643,9 +657,17 @@ const PixelBlast: React.FC<PixelBlastProps> = ({
       if (transparent) t.renderer.setClearAlpha(0);
       else t.renderer.setClearColor(0x000000, 1);
       if (t.liquidEffect) {
-        const uStrength = ((t.liquidEffect as unknown as { uniforms: Map<string, { value: number }> }).uniforms.get("uStrength"));
+        const uStrength = (
+          t.liquidEffect as unknown as {
+            uniforms: Map<string, { value: number }>;
+          }
+        ).uniforms.get("uStrength");
         if (uStrength) uStrength.value = liquidStrength;
-        const uFreq = ((t.liquidEffect as unknown as { uniforms: Map<string, { value: number }> }).uniforms.get("uFreq"));
+        const uFreq = (
+          t.liquidEffect as unknown as {
+            uniforms: Map<string, { value: number }>;
+          }
+        ).uniforms.get("uFreq");
         if (uFreq) uFreq.value = liquidWobbleSpeed;
       }
       if (t.touch) t.touch.radiusScale = liquidRadius;

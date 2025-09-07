@@ -1,28 +1,28 @@
-import React from 'react'
-import Image from 'next/image'
-import { getImageCacheConfig } from '@/config/isr-config'
+import React from "react";
+import Image from "next/image";
+import { getImageCacheConfig } from "@/config/isr-config";
 
 interface ImageComponentProps {
-  src: string
-  alt: string
-  caption?: string
-  id?: string
-  priority?: boolean
-  quality?: number
-  width?: number
-  height?: number
+  src: string;
+  alt: string;
+  caption?: string;
+  id?: string;
+  priority?: boolean;
+  quality?: number;
+  width?: number;
+  height?: number;
 }
 
-export function ImageComponent({ 
-  src, 
-  alt, 
-  caption, 
-  id, 
+export function ImageComponent({
+  src,
+  alt,
+  caption,
+  id,
   priority = false,
-  quality
+  quality,
 }: ImageComponentProps) {
-  const imageConfig = getImageCacheConfig()
-  const imageQuality = quality || imageConfig.quality.default
+  const imageConfig = getImageCacheConfig();
+  const imageQuality = quality || imageConfig.quality.default;
 
   return (
     <figure className="w-full my-6" id={id}>
@@ -45,7 +45,7 @@ export function ImageComponent({
         </figcaption>
       )}
     </figure>
-  )
+  );
 }
 
-export default ImageComponent
+export default ImageComponent;

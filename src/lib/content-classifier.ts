@@ -1,50 +1,50 @@
-import type { ContentCardData } from '@/components/layout/content-card'
-import { getBlogData } from './blog-data-service'
-import { ISR_CONFIG } from '@/config/isr-config'
+import type { ContentCardData } from "@/components/layout/content-card";
+import { getBlogData } from "./blog-data-service";
+import { ISR_CONFIG } from "@/config/isr-config";
 
 // 内存缓存
 let cachedClassifiedData: {
-  recommendCardData: ContentCardData[]
-  newsCardData: ContentCardData[]
-  projectCardData: ContentCardData[]
-} | null = null
-let cacheTimestamp: number = 0
+  recommendCardData: ContentCardData[];
+  newsCardData: ContentCardData[];
+  projectCardData: ContentCardData[];
+} | null = null;
+let cacheTimestamp: number = 0;
 
 /**
  * 检查分类数据缓存是否有效
  */
 function isClassifiedCacheValid(): boolean {
   if (!cachedClassifiedData || !cacheTimestamp) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[ContentClassifier] Cache invalid: no data or timestamp')
+    if (process.env.NODE_ENV === "development") {
+      console.log("[ContentClassifier] Cache invalid: no data or timestamp");
     }
-    return false
+    return false;
   }
-  const cacheAge = (Date.now() - cacheTimestamp) / 1000
-  const isValid = cacheAge < ISR_CONFIG.BLOG_DATA.revalidate
-  
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[ContentClassifier] Cache check:', {
+  const cacheAge = (Date.now() - cacheTimestamp) / 1000;
+  const isValid = cacheAge < ISR_CONFIG.BLOG_DATA.revalidate;
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("[ContentClassifier] Cache check:", {
       cacheAge: Math.round(cacheAge),
       revalidateTime: ISR_CONFIG.BLOG_DATA.revalidate,
-      isValid
-    })
+      isValid,
+    });
   }
-  
-  return isValid
+
+  return isValid;
 }
 
 /**
  * 从博客数据池中提取所有文章
  */
 async function extractAllArticles(): Promise<ContentCardData[]> {
-  const blogData = await getBlogData()
-  const blogPool = blogData.blogInfoPool
-  const articles: ContentCardData[] = []
-  
+  const blogData = await getBlogData();
+  const blogPool = blogData.blogInfoPool;
+  const articles: ContentCardData[] = [];
+
   Object.entries(blogPool).forEach(([, categoryData]) => {
     if (categoryData.articles) {
-      const categoryHref = categoryData.categoryInfo.href
+      const categoryHref = categoryData.categoryInfo.href;
       Object.entries(categoryData.articles).forEach(([articleId, article]) => {
         articles.push({
           title: article.title,
@@ -52,13 +52,13 @@ async function extractAllArticles(): Promise<ContentCardData[]> {
           publishDate: article.publishDate,
           content: article.content,
           href: `${categoryHref}/${articleId}`,
-          imagePath: article.imagePath
-        })
-      })
+          imagePath: article.imagePath,
+        });
+      });
     }
-  })
-  
-  return articles
+  });
+
+  return articles;
 }
 
 /**
@@ -66,66 +66,66 @@ async function extractAllArticles(): Promise<ContentCardData[]> {
  */
 function parseDateString(dateStr: string): number {
   // 检查输入是否为有效字符串
-  if (!dateStr || typeof dateStr !== 'string') {
-    return 0
+  if (!dateStr || typeof dateStr !== "string") {
+    return 0;
   }
-  
+
   // 提取"发布于YYYY年MM月DD日"中的年份、月份和日期
-  const match = dateStr.match(/发布于(\d{4})年(\d+)月(\d+)日/)
+  const match = dateStr.match(/发布于(\d{4})年(\d+)月(\d+)日/);
   if (match) {
-    const year = parseInt(match[1])
-    const month = parseInt(match[2])
-    const day = parseInt(match[3])
+    const year = parseInt(match[1]);
+    const month = parseInt(match[2]);
+    const day = parseInt(match[3]);
     // 使用年份*10000+月份*100+日期作为排序依据
-    return year * 10000 + month * 100 + day
+    return year * 10000 + month * 100 + day;
   }
-  return 0
+  return 0;
 }
 
 /**
  * 随机打乱数组
  */
 function shuffleArray<T>(array: T[]): T[] {
-  const shuffled = [...array]
+  const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  return shuffled
+  return shuffled;
 }
 
 /**
  * 生成推荐卡片数据（3条随机内容）
  */
 export async function generateRecommendCardData(): Promise<ContentCardData[]> {
-  const allArticles = await extractAllArticles()
-  const shuffled = shuffleArray(allArticles)
-  return shuffled.slice(0, 3)
+  const allArticles = await extractAllArticles();
+  const shuffled = shuffleArray(allArticles);
+  return shuffled.slice(0, 3);
 }
 
 /**
  * 生成最新卡片数据（6条内容，按时间倒序排列）
  */
 export async function generateNewsCardData(): Promise<ContentCardData[]> {
-  const allArticles = await extractAllArticles()
-  
+  const allArticles = await extractAllArticles();
+
   // 按发布时间倒序排序（最新的在前）
   const sorted = allArticles.sort((a, b) => {
-    const dateA = parseDateString(a.publishDate)
-    const dateB = parseDateString(b.publishDate)
-    return dateB - dateA // 倒序
-  })
-  
-  return sorted.slice(0, 6)
+    const dateA = parseDateString(a.publishDate);
+    const dateB = parseDateString(b.publishDate);
+    return dateB - dateA; // 倒序
+  });
+
+  return sorted.slice(0, 6);
 }
 
 /**
  * 生成精选项目卡片数据（随机显示）
  */
 export async function generateProjectCardData(): Promise<ContentCardData[]> {
-  const allArticles = await extractAllArticles()
-  const shuffled = shuffleArray(allArticles)
-  return shuffled.slice(0, 6)
+  const allArticles = await extractAllArticles();
+  const shuffled = shuffleArray(allArticles);
+  return shuffled.slice(0, 6);
 }
 
 /**
@@ -134,60 +134,66 @@ export async function generateProjectCardData(): Promise<ContentCardData[]> {
 export async function getAllClassifiedCardData() {
   // 检查缓存是否有效
   if (isClassifiedCacheValid()) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[ContentClassifier] Using cached data')
+    if (process.env.NODE_ENV === "development") {
+      console.log("[ContentClassifier] Using cached data");
     }
-    return cachedClassifiedData!
+    return cachedClassifiedData!;
   }
-  
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[ContentClassifier] Generating new classified data...')
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("[ContentClassifier] Generating new classified data...");
   }
-  
+
   try {
     // 生成新的分类数据
-    const [recommendCardData, newsCardData, projectCardData] = await Promise.all([
-      generateRecommendCardData(),
-      generateNewsCardData(),
-      generateProjectCardData()
-    ])
-    
+    const [recommendCardData, newsCardData, projectCardData] =
+      await Promise.all([
+        generateRecommendCardData(),
+        generateNewsCardData(),
+        generateProjectCardData(),
+      ]);
+
     const result = {
       recommendCardData,
       newsCardData,
-      projectCardData
-    }
-    
+      projectCardData,
+    };
+
     // 更新缓存
-    cachedClassifiedData = result
-    cacheTimestamp = Date.now()
-    
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[ContentClassifier] Cache updated:', {
+    cachedClassifiedData = result;
+    cacheTimestamp = Date.now();
+
+    if (process.env.NODE_ENV === "development") {
+      console.log("[ContentClassifier] Cache updated:", {
         recommendCount: recommendCardData.length,
         newsCount: newsCardData.length,
         projectCount: projectCardData.length,
-        timestamp: new Date().toISOString()
-      })
+        timestamp: new Date().toISOString(),
+      });
     }
-    
-    return result
+
+    return result;
   } catch (error) {
-    console.error('[ContentClassifier] Failed to generate classified card data:', error)
-    
+    console.error(
+      "[ContentClassifier] Failed to generate classified card data:",
+      error
+    );
+
     // 如果有缓存数据，返回缓存（即使过期）
     if (cachedClassifiedData) {
-      console.warn('[ContentClassifier] Using stale classified data due to generation error')
-      return cachedClassifiedData
+      console.warn(
+        "[ContentClassifier] Using stale classified data due to generation error"
+      );
+      return cachedClassifiedData;
     }
-    
+
     // 返回空数据作为降级
-    console.warn('[ContentClassifier] Returning empty data as fallback')
+    console.warn("[ContentClassifier] Returning empty data as fallback");
     return {
       recommendCardData: [],
       newsCardData: [],
-      projectCardData: []
-    }
+      projectCardData: [],
+    };
   }
 }
 
@@ -195,8 +201,8 @@ export async function getAllClassifiedCardData() {
  * 清除分类数据缓存
  */
 export function clearClassifiedCache(): void {
-  cachedClassifiedData = null
-  cacheTimestamp = 0
+  cachedClassifiedData = null;
+  cacheTimestamp = 0;
 }
 
 /**
@@ -207,6 +213,6 @@ export function getClassifiedCacheStatus() {
     hasCachedData: !!cachedClassifiedData,
     cacheTimestamp,
     isValid: isClassifiedCacheValid(),
-    cacheAge: cacheTimestamp ? (Date.now() - cacheTimestamp) / 1000 : 0
-  }
+    cacheAge: cacheTimestamp ? (Date.now() - cacheTimestamp) / 1000 : 0,
+  };
 }

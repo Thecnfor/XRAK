@@ -38,7 +38,9 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+  ),
   openGraph: {
     type: "website",
     locale: "zh_CN",
@@ -74,12 +76,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-Hans-CN" className={`${GeistSans.className} antialiased dark:bg-gray-950`}>
+    <html
+      lang="zh-Hans-CN"
+      className={`${GeistSans.className} antialiased dark:bg-gray-950`}
+    >
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="theme-color" content="#000000" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
       </head>
       <body
         className={`${notoSansSC.variable} ${notoSerifSC.variable} font-sans antialiased`}
@@ -89,9 +97,7 @@ export default function RootLayout({
             <ReduxProvider>
               <LoadingScreen>
                 <Header />
-                <Home>
-                  {children}
-                </Home>
+                <Home>{children}</Home>
               </LoadingScreen>
             </ReduxProvider>
           </ThemeProvider>

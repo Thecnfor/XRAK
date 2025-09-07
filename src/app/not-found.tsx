@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 export default function NotFound() {
   return (
@@ -11,7 +11,7 @@ export default function NotFound() {
           </h1>
           <div className="w-24 h-px bg-foreground/20 dark:bg-foreground/10 mx-auto"></div>
         </div>
-        
+
         {/* 错误信息 */}
         <div className="space-y-4">
           <h2 className="text-2xl font-medium text-foreground/80">
@@ -21,10 +21,10 @@ export default function NotFound() {
             抱歉，您访问的页面不存在或已被移动。
           </p>
         </div>
-        
+
         {/* 返回按钮 */}
         <div className="pt-4">
-          <Link 
+          <Link
             href="/"
             className="inline-flex items-center px-6 py-3 text-sm font-medium text-foreground bg-transparent border border-foreground/20 hover:border-foreground/40 hover:bg-foreground/5 dark:hover:bg-foreground/10 transition-all duration-200 rounded-lg"
           >
@@ -37,6 +37,6 @@ export default function NotFound() {
 }
 
 export const metadata = {
-  title: '页面未找到 - 404',
-  description: '抱歉，您访问的页面不存在。',
+  title: "页面未找到 - 404",
+  description: "抱歉，您访问的页面不存在。",
 };

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 interface LoadingScreenProps {
   children: React.ReactNode;
@@ -14,8 +14,8 @@ export default function LoadingScreen({ children }: LoadingScreenProps) {
 
   useEffect(() => {
     // 检查是否为首次访问
-    const hasVisited = sessionStorage.getItem('hasVisited');
-    
+    const hasVisited = sessionStorage.getItem("hasVisited");
+
     if (hasVisited) {
       setIsFirstVisit(false);
       setIsLoading(false);
@@ -23,7 +23,7 @@ export default function LoadingScreen({ children }: LoadingScreenProps) {
     }
 
     // 标记已访问
-    sessionStorage.setItem('hasVisited', 'true');
+    sessionStorage.setItem("hasVisited", "true");
 
     // 模拟资源加载完成
     const timer = setTimeout(() => {
@@ -38,7 +38,7 @@ export default function LoadingScreen({ children }: LoadingScreenProps) {
 
     // 确保所有资源加载完成
     const handleLoad = () => {
-      if (document.readyState === 'complete') {
+      if (document.readyState === "complete") {
         setTimeout(() => {
           setIsUnmounting(true);
           setShowContent(true);
@@ -49,15 +49,15 @@ export default function LoadingScreen({ children }: LoadingScreenProps) {
       }
     };
 
-    if (document.readyState === 'complete') {
+    if (document.readyState === "complete") {
       handleLoad();
     } else {
-      window.addEventListener('load', handleLoad);
+      window.addEventListener("load", handleLoad);
     }
 
     return () => {
       clearTimeout(timer);
-      window.removeEventListener('load', handleLoad);
+      window.removeEventListener("load", handleLoad);
     };
   }, []);
 
@@ -70,24 +70,30 @@ export default function LoadingScreen({ children }: LoadingScreenProps) {
     <>
       {/* 加载屏幕 */}
       {isLoading && (
-        <div className={`fixed inset-0 z-[9999] bg-white dark:bg-black flex items-center justify-center transition-all duration-1000 ${
-          isUnmounting 
-            ? 'scale-0 blur-md opacity-0 transform-gpu' 
-            : 'scale-100 blur-0 opacity-100'
-        }`}>
-          <div className={`w-full h-full flex items-center justify-center transition-all duration-1000 ${
-            isUnmounting 
-              ? 'scale-0 blur-md opacity-0 transform-gpu' 
-              : 'scale-100 blur-0 opacity-100'
-          }`}>
+        <div
+          className={`fixed inset-0 z-[9999] bg-white dark:bg-black flex items-center justify-center transition-all duration-1000 ${
+            isUnmounting
+              ? "scale-0 blur-md opacity-0 transform-gpu"
+              : "scale-100 blur-0 opacity-100"
+          }`}
+        >
+          <div
+            className={`w-full h-full flex items-center justify-center transition-all duration-1000 ${
+              isUnmounting
+                ? "scale-0 blur-md opacity-0 transform-gpu"
+                : "scale-100 blur-0 opacity-100"
+            }`}
+          >
             <span className="loader"></span>
           </div>
         </div>
       )}
       {/* 主要内容 */}
-      <div className={`transition-opacity duration-1000 ease-in-out ${
-        showContent || !isFirstVisit ? 'opacity-100' : 'opacity-0'
-      }`}>
+      <div
+        className={`transition-opacity duration-1000 ease-in-out ${
+          showContent || !isFirstVisit ? "opacity-100" : "opacity-0"
+        }`}
+      >
         {children}
       </div>
     </>

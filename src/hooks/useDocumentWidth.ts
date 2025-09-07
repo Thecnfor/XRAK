@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 /**
  * 文档尺寸接口
@@ -34,15 +34,15 @@ export function useDocumentWidth(): number {
     };
 
     // 添加事件监听器
-    window.addEventListener('resize', handleResize);
-    
+    window.addEventListener("resize", handleResize);
+
     // 监听方向变化（移动设备）
-    window.addEventListener('orientationchange', handleResize);
+    window.addEventListener("orientationchange", handleResize);
 
     // 清理函数
     return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleResize);
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
     };
   }, []);
 
@@ -73,15 +73,15 @@ export function useDocumentHeight(): number {
     };
 
     // 添加事件监听器
-    window.addEventListener('resize', handleResize);
-    
+    window.addEventListener("resize", handleResize);
+
     // 监听方向变化（移动设备）
-    window.addEventListener('orientationchange', handleResize);
+    window.addEventListener("orientationchange", handleResize);
 
     // 清理函数
     return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleResize);
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
     };
   }, []);
 
@@ -93,14 +93,17 @@ export function useDocumentHeight(): number {
  * @returns {DocumentDimensions} 包含宽度和高度的对象
  */
 export function useDocumentDimensions(): DocumentDimensions {
-  const [dimensions, setDimensions] = useState<DocumentDimensions>({ width: 0, height: 0 });
+  const [dimensions, setDimensions] = useState<DocumentDimensions>({
+    width: 0,
+    height: 0,
+  });
 
   useEffect(() => {
     // 获取准确的文档尺寸，排除滚动条影响
     const getDocumentDimensions = (): DocumentDimensions => {
       return {
         width: document.documentElement.clientWidth || window.innerWidth,
-        height: document.documentElement.clientHeight || window.innerHeight
+        height: document.documentElement.clientHeight || window.innerHeight,
       };
     };
 
@@ -113,15 +116,15 @@ export function useDocumentDimensions(): DocumentDimensions {
     };
 
     // 添加事件监听器
-    window.addEventListener('resize', handleResize);
-    
+    window.addEventListener("resize", handleResize);
+
     // 监听方向变化（移动设备）
-    window.addEventListener('orientationchange', handleResize);
+    window.addEventListener("orientationchange", handleResize);
 
     // 清理函数
     return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleResize);
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
     };
   }, []);
 
@@ -154,7 +157,7 @@ export function useDocumentDimensionsCSS(): { width: string; height: string } {
   const { width, height } = useDocumentDimensions();
   return {
     width: `${width}px`,
-    height: `${height}px`
+    height: `${height}px`,
   };
 }
 

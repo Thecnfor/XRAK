@@ -1,25 +1,32 @@
-import React from 'react'
-import Image from 'next/image'
-import { getImageCacheConfig } from '@/config/isr-config'
+import React from "react";
+import Image from "next/image";
+import { getImageCacheConfig } from "@/config/isr-config";
 
 interface ImageTextComponentProps {
   image: {
-    src: string
-    alt: string
-    caption?: string
-    priority?: boolean
-    quality?: number
-  }
-  content: string
-  id?: string
+    src: string;
+    alt: string;
+    caption?: string;
+    priority?: boolean;
+    quality?: number;
+  };
+  content: string;
+  id?: string;
 }
 
-export function ImageTextComponent({ image, content, id }: ImageTextComponentProps) {
-  const imageConfig = getImageCacheConfig()
-  const imageQuality = image.quality || imageConfig.quality.default
+export function ImageTextComponent({
+  image,
+  content,
+  id,
+}: ImageTextComponentProps) {
+  const imageConfig = getImageCacheConfig();
+  const imageQuality = image.quality || imageConfig.quality.default;
 
   return (
-    <div className="w-full my-6 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start" id={id}>
+    <div
+      className="w-full my-6 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start"
+      id={id}
+    >
       {/* 左侧图片 */}
       <figure className="w-full">
         <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden shadow-lg dark:shadow-neutral-800/50 transition-all duration-300 hover:shadow-xl dark:hover:shadow-neutral-700/50">
@@ -45,7 +52,7 @@ export function ImageTextComponent({ image, content, id }: ImageTextComponentPro
       {/* 右侧文字内容 */}
       <div className="prose prose-neutral dark:prose-invert max-w-none">
         <div className="text-neutral-700 dark:text-neutral-300 leading-relaxed">
-          {content.split('\n').map((paragraph, index) => (
+          {content.split("\n").map((paragraph, index) => (
             <p key={index} className="mb-4 last:mb-0">
               {paragraph}
             </p>
@@ -53,7 +60,7 @@ export function ImageTextComponent({ image, content, id }: ImageTextComponentPro
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default ImageTextComponent
+export default ImageTextComponent;

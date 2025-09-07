@@ -1,32 +1,35 @@
-import { Metadata } from 'next';
-import Link from 'next/link';
-import Image from 'next/image';
-import { ContentCard, type ContentCardData } from '@/components/layout/content-card';
-import { contactLinksData } from '@/config/content-data';
-import { generateProjectCardData } from '@/lib/content-classifier';
-import { TextAnimate } from '@/components/magicui/text-animate';
+import { Metadata } from "next";
+import Link from "next/link";
+import Image from "next/image";
+import {
+  ContentCard,
+  type ContentCardData,
+} from "@/components/layout/content-card";
+import { contactLinksData } from "@/config/content-data";
+import { generateProjectCardData } from "@/lib/content-classifier";
+import { TextAnimate } from "@/components/magicui/text-animate";
 
 // ISR配置 - 启用增量静态再生
 export const revalidate = 3600; // 1小时重新验证
 
 export const metadata: Metadata = {
-  title: '关于我',
-  description: '个人介绍页面 - 专注于创造简洁优雅的解决方案',
-  keywords: ['开发者', 'Next.js', 'React', 'TypeScript', '全栈开发', 'UI/UX'],
+  title: "关于我",
+  description: "个人介绍页面 - 专注于创造简洁优雅的解决方案",
+  keywords: ["开发者", "Next.js", "React", "TypeScript", "全栈开发", "UI/UX"],
 };
-  
+
 export default async function MePage() {
   // 异步获取项目卡片数据，带错误处理
   let projectCardData: ContentCardData[];
   try {
     projectCardData = await generateProjectCardData();
     // 为每个项目数据添加最后更新时间
-    projectCardData = projectCardData.map(project => ({
+    projectCardData = projectCardData.map((project) => ({
       ...project,
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     }));
   } catch (error) {
-    console.error('Failed to load project data:', error);
+    console.error("Failed to load project data:", error);
     // 降级处理：返回空数组
     projectCardData = [];
   }
@@ -34,7 +37,6 @@ export default async function MePage() {
     <div className="min-h-full bg-white dark:bg-black text-black dark:text-white">
       {/* 主容器 - 响应式布局 */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
-        
         {/* 头部区域 - 响应式标题 */}
         <header className="mb-12 sm:mb-16 lg:mb-20">
           <div className="flex flex-col lg:flex-row lg:items-start lg:space-x-12 space-y-8 lg:space-y-0">
@@ -50,7 +52,7 @@ export default async function MePage() {
                 />
               </div>
             </div>
-            
+
             {/* 文字内容区域 */}
             <div className="flex-1 space-y-4 sm:space-y-6">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-light tracking-tight leading-tight">
@@ -58,7 +60,12 @@ export default async function MePage() {
                   Hello, I&apos;m
                 </TextAnimate>
                 <span className="block text-gray-600 dark:text-gray-300 mt-2">
-                  <TextAnimate animation="blurInUp" by="character" delay={0.2} once>
+                  <TextAnimate
+                    animation="blurInUp"
+                    by="character"
+                    delay={0.2}
+                    once
+                  >
                     Shizurak
                   </TextAnimate>
                 </span>
@@ -75,7 +82,6 @@ export default async function MePage() {
 
         {/* 主要内容区域 - 响应式网格 */}
         <main className="space-y-16 sm:space-y-20 lg:space-y-24">
-          
           {/* 关于我 & 专长 - 双栏布局 */}
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16">
             {/* 关于我 */}
@@ -86,12 +92,12 @@ export default async function MePage() {
                 </h2>
                 <div className="space-y-4 text-gray-800 dark:text-gray-200">
                   <p className="text-base sm:text-lg leading-relaxed">
-                      我是一名全栈开发者，热衷于构建用户体验优秀的现代化应用程序。
-                      拥有丰富的前端和后端开发经验，专注于性能优化和代码质量。
+                    我是一名全栈开发者，热衷于构建用户体验优秀的现代化应用程序。
+                    拥有丰富的前端和后端开发经验，专注于性能优化和代码质量。
                   </p>
                   <p className="text-base sm:text-lg leading-relaxed">
-                      相信技术应该服务于人，致力于通过代码创造有意义的产品，
-                      让复杂的问题变得简单，让用户的生活变得更美好。
+                    相信技术应该服务于人，致力于通过代码创造有意义的产品，
+                    让复杂的问题变得简单，让用户的生活变得更美好。
                   </p>
                 </div>
               </div>
@@ -103,16 +109,28 @@ export default async function MePage() {
                 </h3>
                 <div className="space-y-3">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-                    <span className="font-medium text-gray-800 dark:text-gray-200">高级前端开发工程师</span>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">2025 - 至今</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">
+                      高级前端开发工程师
+                    </span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      2025 - 至今
+                    </span>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-                    <span className="font-medium text-gray-800 dark:text-gray-200">全栈开发工程师</span>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">2022 - 2024</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">
+                      全栈开发工程师
+                    </span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      2022 - 2024
+                    </span>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-                    <span className="font-medium text-gray-800 dark:text-gray-200">前端开发工程师</span>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">2020 - 2022</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">
+                      前端开发工程师
+                    </span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      2020 - 2022
+                    </span>
                   </div>
                 </div>
               </div>
@@ -126,7 +144,9 @@ export default async function MePage() {
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-3">
-                    <h4 className="font-medium text-gray-800 dark:text-gray-200 text-sm">前端</h4>
+                    <h4 className="font-medium text-gray-800 dark:text-gray-200 text-sm">
+                      前端
+                    </h4>
                     <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <div>React / Next.js</div>
                       <div>TypeScript / JavaScript</div>
@@ -135,7 +155,9 @@ export default async function MePage() {
                     </div>
                   </div>
                   <div className="space-y-3">
-                    <h4 className="font-medium text-gray-800 dark:text-gray-200 text-sm">后端</h4>
+                    <h4 className="font-medium text-gray-800 dark:text-gray-200 text-sm">
+                      后端
+                    </h4>
                     <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                       <div>Node.js / Express</div>
                       <div>Python / FastAPI</div>
@@ -173,7 +195,9 @@ export default async function MePage() {
                     data={project}
                     variant="project"
                     enableISR={true}
-                    cacheKey={`/api/content-cards/project/${project.id || index}`}
+                    cacheKey={`/api/content-cards/project/${
+                      project.id || index
+                    }`}
                   />
                 ))
               ) : (
@@ -193,15 +217,15 @@ export default async function MePage() {
               </h2>
               <div className="space-y-4">
                 {contactLinksData.map((link, index) => {
-                  const LinkComponent = link.external ? 'a' : Link;
-                  const linkProps = link.external 
-                    ? { 
+                  const LinkComponent = link.external ? "a" : Link;
+                  const linkProps = link.external
+                    ? {
                         href: link.href,
                         target: "_blank",
-                        rel: "noopener noreferrer"
+                        rel: "noopener noreferrer",
                       }
                     : { href: link.href };
-                  
+
                   return (
                     <LinkComponent
                       key={index}

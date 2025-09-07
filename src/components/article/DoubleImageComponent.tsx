@@ -1,29 +1,33 @@
-import React from 'react'
-import Image from 'next/image'
-import { getImageCacheConfig } from '@/config/isr-config'
+import React from "react";
+import Image from "next/image";
+import { getImageCacheConfig } from "@/config/isr-config";
 
 interface DoubleImageComponentProps {
   leftImage: {
-    src: string
-    alt: string
-    caption?: string
-    priority?: boolean
-    quality?: number
-  }
+    src: string;
+    alt: string;
+    caption?: string;
+    priority?: boolean;
+    quality?: number;
+  };
   rightImage: {
-    src: string
-    alt: string
-    caption?: string
-    priority?: boolean
-    quality?: number
-  }
-  id?: string
+    src: string;
+    alt: string;
+    caption?: string;
+    priority?: boolean;
+    quality?: number;
+  };
+  id?: string;
 }
 
-export function DoubleImageComponent({ leftImage, rightImage, id }: DoubleImageComponentProps) {
-  const imageConfig = getImageCacheConfig()
-  const leftQuality = leftImage.quality || imageConfig.quality.default
-  const rightQuality = rightImage.quality || imageConfig.quality.default
+export function DoubleImageComponent({
+  leftImage,
+  rightImage,
+  id,
+}: DoubleImageComponentProps) {
+  const imageConfig = getImageCacheConfig();
+  const leftQuality = leftImage.quality || imageConfig.quality.default;
+  const rightQuality = rightImage.quality || imageConfig.quality.default;
 
   return (
     <div className="w-full my-6 grid grid-cols-1 md:grid-cols-2 gap-4" id={id}>
@@ -71,7 +75,7 @@ export function DoubleImageComponent({ leftImage, rightImage, id }: DoubleImageC
         )}
       </figure>
     </div>
-  )
+  );
 }
 
-export default DoubleImageComponent
+export default DoubleImageComponent;

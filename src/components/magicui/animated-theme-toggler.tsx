@@ -30,7 +30,7 @@ export const AnimatedThemeToggler = ({ className }: props) => {
       });
     }).ready;
 
-    const { top, left, width, height } = 
+    const { top, left, width, height } =
       buttonRef.current.getBoundingClientRect();
     const y = top + height / 2;
     const x = left + width / 2;
@@ -50,14 +50,14 @@ export const AnimatedThemeToggler = ({ className }: props) => {
         duration: 400,
         easing: "ease-in-out",
         pseudoElement: "::view-transition-new(root)",
-      },
+      }
     );
   };
 
   return (
-    <button 
-      ref={buttonRef} 
-      onClick={changeTheme} 
+    <button
+      ref={buttonRef}
+      onClick={changeTheme}
       className={cn(
         "text-[var(--color-btn)] hover:text-[var(--color-text)] transition-colors duration-400 p-1 rounded-md active:scale-95 transform transition-transform cursor-pointer",
         className
